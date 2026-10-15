@@ -1,0 +1,2124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Simulador Interactivo • Aula N.° 3 • TuProfe20Lab • Propiedades de los Triángulos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+
+    <style>
+        :root {
+            --bg-base: #090914;
+            --primary: #00f2fe;
+            --accent: #fe0979;
+            --neon-green: #39ff14;
+            --neon-orange: #ff5e00;
+            --neon-purple: #bf00ff;
+            --neon-yellow: #facc15;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--bg-base);
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        /* Tipografía LaTeX exclusiva para fórmulas, variables y expresiones matemáticas */
+        .math-expr {
+            font-family: 'KaTeX_Main', 'Times New Roman', Georgia, serif;
+            letter-spacing: 0.02em;
+        }
+
+        .math-var {
+            font-family: 'KaTeX_Math', 'Times New Roman', Georgia, serif;
+            font-style: italic;
+        }
+
+        /* Fracción vertical estilo LaTeX */
+        .latex-frac {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            vertical-align: middle;
+            margin: 0 0.18em;
+            line-height: 1.05;
+        }
+        .latex-frac > .num {
+            border-bottom: 1.8px solid currentColor;
+            padding: 0 0.25em 0.08em;
+        }
+        .latex-frac > .den {
+            padding: 0.08em 0.25em 0;
+        }
+
+        @keyframes grid-flow {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 100px; }
+        }
+        .animate-grid-flow {
+            animation: grid-flow 2.5s linear infinite;
+        }
+
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(16px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .animate-fade-in {
+            animation: fade-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* Botones táctiles 3D */
+        .gp-btn {
+            position: relative;
+            font-weight: 900;
+            border-radius: 1rem;
+            box-shadow: 0 6px 0 0 rgba(0,0,0,0.65);
+            transition: all 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+        }
+        .gp-btn:active {
+            box-shadow: 0 0px 0 0 rgba(0,0,0,0.65);
+            transform: translateY(6px);
+        }
+        .gp-btn-cyan {
+            background: linear-gradient(to bottom, #22d3ee, #0891b2);
+            color: #000000;
+            border-bottom: 4px solid #155e75;
+        }
+        .gp-btn-pink {
+            background: linear-gradient(to bottom, #ec4899, #be185d);
+            color: #ffffff;
+            border-bottom: 4px solid #831843;
+        }
+        .gp-btn-green {
+            background: linear-gradient(to bottom, #4ade80, #16a34a);
+            color: #000000;
+            border-bottom: 4px solid #166534;
+        }
+        .gp-btn-yellow {
+            background: linear-gradient(to bottom, #fde047, #ca8a04);
+            color: #000000;
+            border-bottom: 4px solid #854d0e;
+        }
+        .gp-btn-slate {
+            background: linear-gradient(to bottom, #475569, #1e293b);
+            color: #ffffff;
+            border-bottom: 4px solid #0f172a;
+        }
+
+        /* Inputs interactivos para el alumno */
+        .student-input {
+            background: rgba(15, 23, 42, 0.95);
+            border: 2px solid #475569;
+            color: #ffffff;
+            transition: all 0.2s ease;
+        }
+        .student-input:focus {
+            outline: none;
+            border-color: #00f2fe;
+            box-shadow: 0 0 16px rgba(0, 242, 254, 0.45);
+            background: #0f172a;
+        }
+        .student-input.valid-input {
+            border-color: #39ff14;
+            color: #39ff14;
+            background: rgba(20, 83, 45, 0.35);
+            box-shadow: 0 0 14px rgba(57, 255, 20, 0.3);
+        }
+        .student-input.invalid-input {
+            border-color: #fe0979;
+            color: #fe0979;
+            background: rgba(131, 24, 67, 0.35);
+        }
+
+        /* Deslizadores personalizados */
+        input[type=range].neon-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 8px;
+            background: #1e293b;
+            border-radius: 999px;
+            outline: none;
+            border: 1px solid #334155;
+        }
+        input[type=range].neon-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: #00f2fe;
+            border: 3px solid #ffffff;
+            box-shadow: 0 0 12px #00f2fe;
+            cursor: pointer;
+        }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #090914; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #00f2fe; }
+    </style>
+</head>
+<body class="min-h-screen font-sans select-none relative flex flex-col justify-between">
+
+    <div class="fixed inset-0 overflow-hidden pointer-events-none z-0 bg-[#090914]">
+        <div class="absolute top-[4%] left-1/2 -translate-x-1/2 w-[780px] h-[780px] rounded-full bg-gradient-to-b from-pink-600 to-transparent opacity-15 blur-[110px]"></div>
+        <div class="absolute bottom-[-25%] left-[-50%] w-[200%] h-[110%] opacity-25 animate-grid-flow" style="
+            background-image: linear-gradient(rgba(0, 242, 254, 0.45) 2px, transparent 2px), linear-gradient(90deg, rgba(0, 242, 254, 0.45) 2px, transparent 2px);
+            background-size: 90px 90px;
+            transform: perspective(1000px) rotateX(70deg);
+            box-shadow: inset 0 120px 120px #090914;
+        "></div>
+    </div>
+
+    <section id="coverPortalSection" class="relative z-10 max-w-7xl w-full mx-auto my-auto p-4 sm:p-7 animate-fade-in">
+        <div class="bg-black/75 p-5 sm:p-10 rounded-[3rem] backdrop-blur-2xl border border-white/10 shadow-[0_0_120px_rgba(0,242,254,0.22)] flex flex-col items-center text-center">
+            <div class="inline-flex items-center gap-2 bg-cyan-950/90 border border-cyan-500/60 px-4 py-1.5 rounded-full mb-3">
+                <i class="fa-solid fa-draw-polygon text-cyan-400 text-xs"></i>
+                <span class="text-cyan-300 font-black tracking-[0.22em] uppercase text-xs sm:text-sm">
+                    SIMULADOR INTERACTIVO • AULA N.° 3
+                </span>
+            </div>
+
+            <h1 class="text-3xl sm:text-6xl font-black mb-1 tracking-tight text-white" style="text-shadow: 0 0 35px rgba(0,242,254,0.6)">
+                TuProfe20Lab
+            </h1>
+            <h2 class="text-2xl sm:text-5xl font-black leading-tight mb-4 bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 via-pink-500 to-yellow-400 uppercase">
+                Propiedades de los Triángulos
+            </h2>
+            <p class="text-slate-300 text-sm sm:text-lg max-w-4xl mb-6 font-medium">
+                Explora los <b>3 Teoremas Fundamentales</b>, las <b>3 Propiedades Auxiliares</b> (Bumerán, Mariposa y Pescadito) y los <b>3 Teoremas de Bisectrices</b>. Manipula los ángulos en tiempo real y resuelve los <b>2 ejemplos interactivos por cada teorema</b>.
+            </p>
+
+            <!-- Filtros rápidos por categoría en la portada -->
+            <div class="flex flex-wrap items-center justify-center gap-2 mb-6">
+                <span class="px-3.5 py-1 rounded-full bg-cyan-950 border border-cyan-500/60 text-cyan-300 text-xs font-black uppercase tracking-wider">
+                    1–3: Teoremas Fundamentales
+                </span>
+                <span class="px-3.5 py-1 rounded-full bg-yellow-950 border border-yellow-500/60 text-yellow-300 text-xs font-black uppercase tracking-wider">
+                    4–6: Propiedades Auxiliares (Bumerán, Mariposa, Pescadito)
+                </span>
+                <span class="px-3.5 py-1 rounded-full bg-pink-950 border border-pink-500/60 text-pink-300 text-xs font-black uppercase tracking-wider">
+                    7–9: Ángulos entre Bisectrices
+                </span>
+            </div>
+
+            <!-- Grid de los 9 Teoremas -->
+            <div id="coverCardsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full text-left">
+                <!-- Generado dinámicamente con miniaturas vectoriales y fórmulas LaTeX -->
+            </div>
+        </div>
+    </section>
+
+    <div id="labWorkspaceWrapper" class="hidden relative z-10 flex-1 flex flex-col justify-between max-w-[1480px] w-full mx-auto p-3 sm:p-5 gap-4">
+
+        <!-- HUD Header Superior -->
+        <header class="bg-black/70 backdrop-blur-2xl border border-white/10 rounded-[2rem] px-4 py-3 sm:px-6 sm:py-3.5 flex flex-wrap items-center justify-between gap-3 shadow-2xl">
+            <div class="flex items-center gap-3">
+                <button onclick="openCoverPortal()" class="gp-btn gp-btn-slate px-4 py-2.5 text-xs sm:text-sm gap-2">
+                    <i class="fa-solid fa-table-cells-large text-cyan-400"></i>
+                    <span>PORTADA</span>
+                </button>
+                <div>
+                    <h1 class="text-sm sm:text-lg font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-pink-500 to-yellow-400 uppercase">
+                        SIMULADOR INTERACTIVO • AULA N.° 3 • TUPROFE20LAB
+                    </h1>
+                    <p id="headerSubtitleBadge" class="text-[11px] text-slate-400 font-bold tracking-widest uppercase">
+                        PROPIEDADES DE LOS TRIÁNGULOS • TEOREMA 1 DE 9
+                    </p>
+                </div>
+            </div>
+
+            <!-- Botones de navegación rápida de los 9 teoremas -->
+            <div class="flex flex-wrap items-center gap-1" id="topTheoremNav">
+                <!-- Renderizado dinámicamente -->
+            </div>
+
+            <!-- Botón de Sonido -->
+            <button id="soundToggleBtn" onclick="toggleAudio()" class="p-2.5 sm:px-4 sm:py-2 text-white bg-slate-800 rounded-2xl hover:bg-slate-700 transition-colors border-2 border-slate-600 flex items-center gap-2 font-bold text-xs">
+                <i id="soundIcon" class="fa-solid fa-volume-high text-cyan-400"></i>
+                <span id="soundText" class="hidden sm:inline">SONIDO ON</span>
+            </button>
+        </header>
+
+        <!-- Barra Copiloto Robot 3D + Enunciado y Fórmula LaTeX del Teorema -->
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+            <!-- Copiloto Robot 3D -->
+            <div class="lg:col-span-7 bg-slate-900/85 backdrop-blur-xl border-2 border-slate-700 rounded-[2rem] p-3.5 sm:p-4 flex flex-col sm:flex-row items-center gap-4 shadow-xl">
+                <div class="relative w-28 h-28 sm:w-32 sm:h-32 shrink-0 rounded-3xl bg-black border-[3px] border-cyan-400 shadow-[0_0_25px_rgba(0,242,254,0.35)] overflow-hidden cursor-grab active:cursor-grabbing" id="robotCanvasContainer" title="Arrastra para mover el rostro 3D">
+                    <div class="absolute top-1.5 left-2 z-10 flex items-center gap-1.5 bg-black/80 px-2 py-0.5 rounded-full border border-cyan-400/60">
+                        <span id="robotStatusDot" class="w-2 h-2 rounded-full bg-[#39ff14] animate-ping"></span>
+                        <span id="robotMoodBadgeText" class="text-[9px] font-black tracking-wider text-cyan-300 uppercase">AULA N.° 3</span>
+                    </div>
+                </div>
+
+                <div class="flex-1 flex flex-col justify-between w-full h-full gap-2.5">
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="bg-cyan-950 text-cyan-300 border border-cyan-800 px-3 py-0.5 rounded-full font-black text-[11px] tracking-widest uppercase">
+                                ROBO-PROFE 3D • GUÍA DE GEOMETRÍA
+                            </span>
+                            <span id="studentProgressBadge" class="text-xs font-black text-[#39ff14] tracking-wider uppercase">
+                                EJEMPLOS RESUELTOS: 0 / 2
+                            </span>
+                        </div>
+                        <div id="robotMessage" class="text-xs sm:text-sm font-bold text-slate-100 leading-relaxed bg-black/60 p-3 rounded-2xl border border-white/10 min-h-[54px] flex items-center">
+                            ¡Bienvenidos al Aula N.° 3! Pasa el mouse por los ángulos del gráfico o mueve los deslizadores para comprobar la propiedad, y luego resuelve los 2 ejemplos.
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button onclick="explainCurrentTheorem()" class="gp-btn gp-btn-cyan px-3.5 py-1.5 text-xs gap-1.5">
+                            <i class="fa-solid fa-book-open"></i> EXPLICAR TEOREMA
+                        </button>
+                        <button onclick="giveExampleHint()" class="gp-btn gp-btn-yellow px-3.5 py-1.5 text-xs gap-1.5">
+                            <i class="fa-solid fa-lightbulb"></i> PISTA PASO A PASO
+                        </button>
+                        <button onclick="autoSolveBothExamples()" class="gp-btn gp-btn-pink px-3.5 py-1.5 text-xs gap-1.5">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> RESOLVER DEMO
+                        </button>
+                        <button onclick="resetCurrentExamples()" class="gp-btn gp-btn-slate px-3.5 py-1.5 text-xs gap-1.5 ml-auto">
+                            <i class="fa-solid fa-rotate-left"></i> LIMPIAR
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tarjeta de Enunciado y Fórmula LaTeX del Teorema Activo -->
+            <div class="lg:col-span-5 bg-slate-900/85 backdrop-blur-xl border-2 border-slate-700 rounded-[2rem] p-4 flex flex-col justify-between shadow-xl">
+                <div class="flex items-center justify-between">
+                    <span id="theoremCategoryPill" class="text-[11px] font-black text-cyan-300 bg-cyan-950 border border-cyan-700 px-3 py-0.5 rounded-full uppercase tracking-wider">
+                        TEOREMA FUNDAMENTAL 1
+                    </span>
+                    <span id="theoremShortTag" class="text-xs font-black text-yellow-400 bg-yellow-950/80 border border-yellow-700 px-3 py-0.5 rounded-full">
+                        Ángulos Interiores
+                    </span>
+                </div>
+
+                <div class="my-2 py-2.5 px-4 rounded-2xl bg-black border-2 border-cyan-400/80 text-center shadow-[0_0_25px_rgba(0,242,254,0.18)]">
+                    <div id="theoremTitleDisplay" class="text-lg sm:text-xl font-black text-white tracking-tight uppercase">
+                        SUMA DE ÁNGULOS INTERIORES
+                    </div>
+                    <div id="theoremLatexFormulaBox" class="math-expr text-2xl sm:text-3xl font-bold text-yellow-300 mt-1">
+                        <span class="math-var">α</span> + <span class="math-var">β</span> + <span class="math-var">θ</span> = 180°
+                    </div>
+                </div>
+
+                <p id="theoremStatementText" class="text-xs font-medium text-slate-300 text-center leading-snug">
+                    En todo triángulo, la suma de las medidas de sus tres ángulos interiores siempre es igual a <span class="math-expr font-bold text-white">180°</span>.
+                </p>
+            </div>
+        </section>
+
+        <!-- Cuerpo Principal: Visor Geométrico Manipulable (Izquierda 7 col) + 2 Ejemplos Interactivos para el Alumno (Derecha 5 col) -->
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+
+            <!-- GRAN LIENZO GEOMÉTRICO INTERACTIVO Y MANIPULABLE -->
+            <div class="lg:col-span-7 bg-slate-900/85 backdrop-blur-xl border-2 border-slate-700 rounded-[2.2rem] p-4 sm:p-5 flex flex-col justify-between shadow-2xl">
+                <!-- Barra Superior de Modo de Visualización -->
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        <button onclick="switchDiagramViewMode('EXPLORE')" id="modeBtn-EXPLORE" class="px-3.5 py-1.5 rounded-xl font-black text-xs bg-cyan-400 text-black shadow-[0_0_15px_rgba(0,242,254,0.45)] transition-all">
+                            <i class="fa-solid fa-arrows-up-down-left-right mr-1"></i> Mover Vértices en Vivo
+                        </button>
+                        <button onclick="switchDiagramViewMode('EX1')" id="modeBtn-EX1" class="px-3.5 py-1.5 rounded-xl font-black text-xs bg-slate-800 text-cyan-300 border border-cyan-500/40 hover:bg-slate-700 transition-all">
+                            <i class="fa-solid fa-1 mr-1"></i> Ver Datos Ejemplo 1
+                        </button>
+                        <button onclick="switchDiagramViewMode('EX2')" id="modeBtn-EX2" class="px-3.5 py-1.5 rounded-xl font-black text-xs bg-slate-800 text-pink-300 border border-pink-500/40 hover:bg-slate-700 transition-all">
+                            <i class="fa-solid fa-2 mr-1"></i> Ver Datos Ejemplo 2
+                        </button>
+                    </div>
+
+                    <button onclick="toggleAngleTooltips()" id="toggleTooltipsBtn" class="px-3 py-1.5 rounded-xl font-black text-xs bg-emerald-500 text-black border-b-2 border-emerald-800 transition-all flex items-center gap-1.5">
+                        <i class="fa-solid fa-tag"></i>
+                        <span id="toggleTooltipsText">ETIQUETAS: ON</span>
+                    </button>
+                </div>
+
+                <!-- Lienzo SVG Interactivo de Alta Precisión -->
+                <div id="geometryViewportBox" class="relative w-full h-[380px] sm:h-[430px] bg-gradient-to-b from-[#060814] via-[#090d22] to-[#05060f] rounded-3xl border-2 border-slate-700 overflow-hidden shadow-inner flex items-center justify-center">
+                    <svg id="geometrySvgCanvas" viewBox="0 0 680 420" class="w-full h-full select-none touch-none"></svg>
+
+                    <!-- Indicador superior izquierdo -->
+                    <div class="absolute top-3 left-3 bg-black/80 backdrop-blur-md border border-white/15 px-3.5 py-2 rounded-2xl pointer-events-none flex items-center gap-2.5">
+                        <span id="diagramModeDot" class="w-3 h-3 rounded-full bg-cyan-400 shadow-[0_0_10px_#00f2fe]"></span>
+                        <div>
+                            <div id="diagramOverlayTitle" class="text-xs font-black text-white uppercase tracking-wider">
+                                GEOMETRÍA DINÁMICA • ARRASTRA LOS VÉRTICES
+                            </div>
+                            <div id="diagramOverlaySub" class="text-[11px] font-bold text-slate-300">
+                                Haz clic y arrastra los puntos blancos/cian para deformar la figura
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ecuación en vivo comprobada en el lienzo -->
+                    <div class="absolute bottom-3 left-3 right-3 bg-black/85 backdrop-blur-md border border-cyan-500/40 px-4 py-2 rounded-2xl flex flex-wrap items-center justify-between gap-2 pointer-events-none">
+                        <span class="text-[11px] font-black text-cyan-300 uppercase tracking-wider">
+                            <i class="fa-solid fa-check-double mr-1"></i> COMPROBACIÓN EN TIEMPO REAL:
+                        </span>
+                        <div id="liveCanvasEquation" class="math-expr text-base sm:text-xl font-bold text-white">
+                            60° + 70° + 50° = 180°
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel Inferior de Coordenadas de Vértices y Restauración -->
+                <div class="mt-3 bg-black/70 border border-white/10 rounded-2xl p-3.5">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                        <span class="text-xs font-black text-cyan-300 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-hand-pointer text-yellow-400 animate-bounce"></i>
+                            ARRASTRA CUALQUIER VÉRTICE EN LA PIZARRA PARA CAMBIAR LOS ÁNGULOS EN VIVO:
+                        </span>
+                        <button onclick="resetSlidersToDefault()" class="px-3 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 border border-cyan-500/40 text-[11px] font-black text-cyan-300 transition-colors flex items-center gap-1">
+                            <i class="fa-solid fa-rotate"></i> Restaurar Figura Original
+                        </button>
+                    </div>
+                    <div id="interactiveSlidersContainer" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                        <!-- Indicadores de vértices / ángulos en tiempo real -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- PANEL DERECHO (5 Columnas): 2 EJEMPLOS INTERACTIVOS POR CADA TEOREMA PARA QUE EL ALUMNO INGRESE VALORES -->
+            <div class="lg:col-span-5 flex flex-col justify-between gap-4">
+
+                <!-- TARJETA EJEMPLO 1 -->
+                <div id="exampleCard1" class="flex-1 bg-slate-900/90 backdrop-blur-xl border-2 border-cyan-500/60 rounded-[2.2rem] p-4 sm:p-5 flex flex-col justify-between shadow-2xl">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="bg-cyan-950 text-cyan-300 border border-cyan-600 px-3 py-0.5 rounded-full font-black text-xs uppercase tracking-wider">
+                                EJEMPLO INTERACTIVO 1
+                            </span>
+                            <button onclick="switchDiagramViewMode('EX1')" class="text-xs font-black text-cyan-400 hover:underline flex items-center gap-1">
+                                <i class="fa-solid fa-eye"></i> Ver en la figura
+                            </button>
+                        </div>
+
+                        <p id="ex1PromptText" class="text-xs sm:text-sm font-bold text-slate-200 mb-3 leading-relaxed">
+                            En la figura mostrada, calcula el valor de <span class="math-expr math-var">x</span>:
+                        </p>
+
+                        <!-- Cinta de Datos Dados del Ejemplo 1 -->
+                        <div id="ex1GivenBadges" class="flex flex-wrap items-center gap-2 mb-3">
+                            <!-- Badges dinámicos -->
+                        </div>
+
+                        <!-- Paso 1: Completar el planteamiento de la ecuación -->
+                        <div class="bg-black/65 border border-white/10 rounded-2xl p-3 mb-3">
+                            <div class="text-[11px] font-black text-slate-400 uppercase mb-1">
+                                PASO 1 • PLANTEAMIENTO CON LA PROPIEDAD:
+                            </div>
+                            <div id="ex1EquationPreview" class="math-expr text-base sm:text-lg font-bold text-cyan-300">
+                                <!-- Ecuación sustituida -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Paso 2: Ingresar el valor final de la incógnita -->
+                    <div>
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-black/80 border-2 border-cyan-500/40 rounded-2xl p-3">
+                            <div>
+                                <label id="ex1InputLabel" for="inputEx1Answer" class="block text-xs font-black text-white uppercase tracking-wider">
+                                    CALCULA E INGRESA <span class="math-expr math-var text-cyan-300">x</span>:
+                                </label>
+                                <span id="ex1HintSub" class="text-[11px] text-slate-400 font-medium">
+                                    Escribe el valor numérico en grados
+                                </span>
+                            </div>
+
+                            <div class="flex items-center gap-2">
+                                <input
+                                    type="number"
+                                    step="any"
+                                    id="inputEx1Answer"
+                                    placeholder="?"
+                                    onfocus="switchDiagramViewMode('EX1', true)"
+                                    oninput="validateExampleAnswer(1)"
+                                    class="student-input math-expr font-bold w-24 py-2 px-3 rounded-xl text-center text-xl"
+                                />
+                                <span class="math-expr text-xl font-bold text-cyan-300">°</span>
+                                <span id="statusEx1Badge" class="w-8 h-8 rounded-full bg-slate-800 border border-slate-600 flex items-center justify-center text-slate-400 text-xs shrink-0">
+                                    <i class="fa-solid fa-minus"></i>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Desglose paso a paso en LaTeX al acertar -->
+                        <div id="ex1StepByStepBox" class="mt-2.5 text-xs text-slate-300 bg-slate-950/90 p-3 rounded-xl border border-white/10 min-h-[44px] flex items-center">
+                            Ingresa tu respuesta arriba para verificar el desarrollo paso a paso.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TARJETA EJEMPLO 2 -->
+                <div id="exampleCard2" class="flex-1 bg-slate-900/90 backdrop-blur-xl border-2 border-pink-500/60 rounded-[2.2rem] p-4 sm:p-5 flex flex-col justify-between shadow-2xl">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="bg-pink-950 text-pink-300 border border-pink-600 px-3 py-0.5 rounded-full font-black text-xs uppercase tracking-wider">
+                                EJEMPLO INTERACTIVO 2
+                            </span>
+                            <button onclick="switchDiagramViewMode('EX2')" class="text-xs font-black text-pink-400 hover:underline flex items-center gap-1">
+                                <i class="fa-solid fa-eye"></i> Ver en la figura
+                            </button>
+                        </div>
+
+                        <p id="ex2PromptText" class="text-xs sm:text-sm font-bold text-slate-200 mb-3 leading-relaxed">
+                            Resuelve el segundo reto aplicando el mismo teorema:
+                        </p>
+
+                        <!-- Cinta de Datos Dados del Ejemplo 2 -->
+                        <div id="ex2GivenBadges" class="flex flex-wrap items-center gap-2 mb-3">
+                            <!-- Badges dinámicos -->
+                        </div>
+
+                        <!-- Paso 1: Planteamiento -->
+                        <div class="bg-black/65 border border-white/10 rounded-2xl p-3 mb-3">
+                            <div class="text-[11px] font-black text-slate-400 uppercase mb-1">
+                                PASO 1 • PLANTEAMIENTO CON LA PROPIEDAD:
+                            </div>
+                            <div id="ex2EquationPreview" class="math-expr text-base sm:text-lg font-bold text-pink-300">
+                                <!-- Ecuación sustituida -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Paso 2: Ingresar el valor final -->
+                    <div>
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-black/80 border-2 border-pink-500/40 rounded-2xl p-3">
+                            <div>
+                                <label id="ex2InputLabel" for="inputEx2Answer" class="block text-xs font-black text-white uppercase tracking-wider">
+                                    CALCULA E INGRESA <span class="math-expr math-var text-pink-400">x</span>:
+                                </label>
+                                <span id="ex2HintSub" class="text-[11px] text-slate-400 font-medium">
+                                    Escribe el valor numérico en grados
+                                </span>
+                            </div>
+
+                            <div class="flex items-center gap-2">
+                                <input
+                                    type="number"
+                                    step="any"
+                                    id="inputEx2Answer"
+                                    placeholder="?"
+                                    onfocus="switchDiagramViewMode('EX2', true)"
+                                    oninput="validateExampleAnswer(2)"
+                                    class="student-input math-expr font-bold w-24 py-2 px-3 rounded-xl text-center text-xl"
+                                />
+                                <span class="math-expr text-xl font-bold text-pink-400">°</span>
+                                <span id="statusEx2Badge" class="w-8 h-8 rounded-full bg-slate-800 border border-slate-600 flex items-center justify-center text-slate-400 text-xs shrink-0">
+                                    <i class="fa-solid fa-minus"></i>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Desglose paso a paso en LaTeX al acertar -->
+                        <div id="ex2StepByStepBox" class="mt-2.5 text-xs text-slate-300 bg-slate-950/90 p-3 rounded-xl border border-white/10 min-h-[44px] flex items-center">
+                            Ingresa tu respuesta arriba para verificar el desarrollo paso a paso.
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const THEOREMS_DATA = [
+            // ================= 1 AL 3: TEOREMAS FUNDAMENTALES =================
+            {
+                id: 1,
+                group: 'FUNDAMENTALES',
+                groupBadge: 'TEOREMA FUNDAMENTAL 1',
+                shortTitle: 'Suma de Ángulos Interiores',
+                tag: 'Ángulos Internos',
+                borderColor: 'border-cyan-400',
+                accentHex: '#00f2fe',
+                formulaHTML: `<span class="math-var">α</span> + <span class="math-var">β</span> + <span class="math-var">θ</span> = 180°`,
+                statement: `En todo triángulo <span class="math-expr">ABC</span>, la suma de las medidas de sus tres ángulos interiores siempre es igual a <span class="math-expr font-bold text-cyan-300">180°</span>.`,
+                robotIntro: `¡Observa el triángulo <span class="math-expr">ABC</span>! Si sumamos los tres ángulos de adentro (<span class="math-expr"><span class="math-var">α</span> + <span class="math-var">β</span> + <span class="math-var">θ</span></span>), el resultado siempre da exactamente <span class="math-expr">180°</span>.`,
+                sliders: [
+                    { key: 'a', label: 'Ángulo α', min: 25, max: 110, val: 60, color: '#00f2fe' },
+                    { key: 'b', label: 'Ángulo β', min: 25, max: 110, val: 70, color: '#facc15' }
+                ],
+                examples: [
+                    {
+                        prompt: `En el triángulo <span class="math-expr">ABC</span>, si <span class="math-expr"><span class="math-var">α</span> = 65°</span>, <span class="math-expr"><span class="math-var">β</span> = 75°</span> y <span class="math-expr"><span class="math-var">θ</span> = <span class="math-var">x</span></span>, calcula el valor de <span class="math-expr math-var">x</span>:`,
+                        given: [`α = 65°`, `β = 75°`, `θ = x`],
+                        diagramLabels: { a: '65°', b: '75°', c: 'x' },
+                        equationPreview: `65° + 75° + <span class="math-var">x</span> = 180°`,
+                        answer: 40,
+                        stepsHTML: `140° + <span class="math-var">x</span> = 180° &nbsp;⇒&nbsp; <span class="math-var">x</span> = 180° − 140° = <b class="text-[#39ff14]">40°</b>`
+                    },
+                    {
+                        prompt: `En el triángulo <span class="math-expr">ABC</span>, los ángulos interiores miden <span class="math-expr"><span class="math-var">α</span> = 2<span class="math-var">x</span></span>, <span class="math-expr"><span class="math-var">β</span> = 3<span class="math-var">x</span></span> y <span class="math-expr"><span class="math-var">θ</span> = 4<span class="math-var">x</span></span>. Halla <span class="math-expr math-var">x</span>:`,
+                        given: [`α = 2x`, `β = 3x`, `θ = 4x`],
+                        diagramLabels: { a: '2x', b: '3x', c: '4x' },
+                        equationPreview: `2<span class="math-var">x</span> + 3<span class="math-var">x</span> + 4<span class="math-var">x</span> = 180°`,
+                        answer: 20,
+                        stepsHTML: `9<span class="math-var">x</span> = 180° &nbsp;⇒&nbsp; <span class="math-var">x</span> = <span class="latex-frac"><span class="num">180°</span><span class="den">9</span></span> = <b class="text-[#39ff14]">20°</b>`
+                    }
+                ]
+            },
+            {
+                id: 2,
+                group: 'FUNDAMENTALES',
+                groupBadge: 'TEOREMA FUNDAMENTAL 2',
+                shortTitle: 'Medida del Ángulo Exterior',
+                tag: 'Ángulo Exterior',
+                borderColor: 'border-yellow-400',
+                accentHex: '#facc15',
+                formulaHTML: `<span class="math-var">x</span> = <span class="math-var">α</span> + <span class="math-var">β</span>`,
+                statement: `En todo triángulo, la medida de un ángulo exterior (<span class="math-expr math-var">x</span>) es igual a la suma de las medidas de los dos ángulos interiores no adyacentes a él (<span class="math-expr"><span class="math-var">α</span> + <span class="math-var">β</span></span>).`,
+                robotIntro: `¡Mira el ángulo exterior <span class="math-expr math-var">x</span> fuera del vértice <span class="math-expr">C</span>! Su medida siempre es igual a la suma de los dos ángulos internos lejanos: <span class="math-expr"><span class="math-var">x</span> = <span class="math-var">α</span> + <span class="math-var">β</span></span>.`,
+                sliders: [
+                    { key: 'a', label: 'Ángulo interno α', min: 25, max: 95, val: 55, color: '#00f2fe' },
+                    { key: 'b', label: 'Ángulo interno β', min: 25, max: 95, val: 65, color: '#facc15' }
+                ],
+                examples: [
+                    {
+                        prompt: `En el triángulo <span class="math-expr">ABC</span>, si los ángulos internos no adyacentes miden <span class="math-expr"><span class="math-var">α</span> = 48°</span> y <span class="math-expr"><span class="math-var">β</span> = 67°</span>, calcula el ángulo exterior <span class="math-expr math-var">x</span>:`,
+                        given: [`α = 48°`, `β = 67°`, `Exterior = x`],
+                        diagramLabels: { a: '48°', b: '67°', ext: 'x' },
+                        equationPreview: `<span class="math-var">x</span> = 48° + 67°`,
+                        answer: 115,
+                        stepsHTML: `<span class="math-var">x</span> = 48° + 67° = <b class="text-[#39ff14]">115°</b>`
+                    },
+                    {
+                        prompt: `Si el ángulo exterior en <span class="math-expr">C</span> mide <span class="math-expr">130°</span>, <span class="math-expr"><span class="math-var">α</span> = 50°</span> y <span class="math-expr"><span class="math-var">β</span> = 2<span class="math-var">x</span></span>, calcula el valor de <span class="math-expr math-var">x</span>:`,
+                        given: [`α = 50°`, `β = 2x`, `Exterior = 130°`],
+                        diagramLabels: { a: '50°', b: '2x', ext: '130°' },
+                        equationPreview: `50° + 2<span class="math-var">x</span> = 130°`,
+                        answer: 40,
+                        stepsHTML: `2<span class="math-var">x</span> = 130° − 50° = 80° &nbsp;⇒&nbsp; <span class="math-var">x</span> = <b class="text-[#39ff14]">40°</b>`
+                    }
+                ]
+            },
+            {
+                id: 3,
+                group: 'FUNDAMENTALES',
+                groupBadge: 'TEOREMA FUNDAMENTAL 3',
+                shortTitle: 'Suma de Ángulos Exteriores',
+                tag: 'Ángulos Externos',
+                borderColor: 'border-green-400',
+                accentHex: '#39ff14',
+                formulaHTML: `<span class="math-var">x</span> + <span class="math-var">y</span> + <span class="math-var">z</span> = 360°`,
+                statement: `En todo triángulo, la suma de las medidas de sus tres ángulos exteriores (uno por cada vértice) siempre es igual a <span class="math-expr font-bold text-[#39ff14]">360°</span>.`,
+                robotIntro: `¡Una vuelta completa alrededor del triángulo! La suma de los tres ángulos exteriores <span class="math-expr"><span class="math-var">x</span> + <span class="math-var">y</span> + <span class="math-var">z</span></span> siempre da <span class="math-expr">360°</span>.`,
+                sliders: [
+                    { key: 'x', label: 'Exterior x', min: 85, max: 155, val: 120, color: '#00f2fe' },
+                    { key: 'y', label: 'Exterior y', min: 85, max: 155, val: 130, color: '#facc15' }
+                ],
+                examples: [
+                    {
+                        prompt: `En el triángulo <span class="math-expr">ABC</span>, dos ángulos exteriores miden <span class="math-expr"><span class="math-var">y</span> = 125°</span> y <span class="math-expr"><span class="math-var">z</span> = 135°</span>. Calcula el ángulo exterior <span class="math-expr math-var">x</span>:`,
+                        given: [`Exterior A = x`, `y = 125°`, `z = 135°`],
+                        diagramLabels: { x: 'x', y: '125°', z: '135°' },
+                        equationPreview: `<span class="math-var">x</span> + 125° + 135° = 360°`,
+                        answer: 100,
+                        stepsHTML: `<span class="math-var">x</span> + 260° = 360° &nbsp;⇒&nbsp; <span class="math-var">x</span> = 360° − 260° = <b class="text-[#39ff14]">100°</b>`
+                    },
+                    {
+                        prompt: `Los tres ángulos exteriores de un triángulo miden <span class="math-expr">2<span class="math-var">x</span></span>, <span class="math-expr">3<span class="math-var">x</span></span> y <span class="math-expr">4<span class="math-var">x</span></span>. Calcula el valor de <span class="math-expr math-var">x</span>:`,
+                        given: [`x₁ = 2x`, `y = 3x`, `z = 4x`],
+                        diagramLabels: { x: '2x', y: '3x', z: '4x' },
+                        equationPreview: `2<span class="math-var">x</span> + 3<span class="math-var">x</span> + 4<span class="math-var">x</span> = 360°`,
+                        answer: 40,
+                        stepsHTML: `9<span class="math-var">x</span> = 360° &nbsp;⇒&nbsp; <span class="math-var">x</span> = <span class="latex-frac"><span class="num">360°</span><span class="den">9</span></span> = <b class="text-[#39ff14]">40°</b>`
+                    }
+                ]
+            },
+
+            // ================= 4 AL 6: PROPIEDADES AUXILIARES =================
+            {
+                id: 4,
+                group: 'AUXILIARES',
+                groupBadge: 'PROPIEDAD AUXILIAR 1',
+                shortTitle: 'Propiedad del Bumerán',
+                tag: 'El Bumerán',
+                borderColor: 'border-orange-500',
+                accentHex: '#ff5e00',
+                formulaHTML: `<span class="math-var">α</span> = <span class="math-var">β</span> + <span class="math-var">θ</span> + <span class="math-var">ω</span>`,
+                statement: `En el cuadrilátero cóncavo (figura del <b>Bumerán</b>), el ángulo exterior cóncavo <span class="math-expr math-var">α</span> es igual a la suma de los tres ángulos interiores de las puntas (<span class="math-expr"><span class="math-var">β</span> + <span class="math-var">θ</span> + <span class="math-var">ω</span></span>).`,
+                robotIntro: `¡Es la famosa propiedad del <b>Bumerán</b>! Suma las tres puntas internas (<span class="math-expr"><span class="math-var">β</span> + <span class="math-var">θ</span> + <span class="math-var">ω</span></span>) y obtendrás el ángulo de afuera <span class="math-expr math-var">α</span>.`,
+                sliders: [
+                    { key: 'b', label: 'Punta superior β', min: 15, max: 60, val: 35, color: '#facc15' },
+                    { key: 't', label: 'Punta izquierda θ', min: 15, max: 60, val: 45, color: '#00f2fe' },
+                    { key: 'w', label: 'Punta derecha ω', min: 15, max: 60, val: 30, color: '#39ff14' }
+                ],
+                examples: [
+                    {
+                        prompt: `En la figura del Bumerán, si <span class="math-expr"><span class="math-var">β</span> = 35°</span>, <span class="math-expr"><span class="math-var">θ</span> = 45°</span> y <span class="math-expr"><span class="math-var">ω</span> = 30°</span>, calcula el ángulo <span class="math-expr"><span class="math-var">α</span> = <span class="math-var">x</span></span>:`,
+                        given: [`β = 35°`, `θ = 45°`, `ω = 30°`, `α = x`],
+                        diagramLabels: { b: '35°', t: '45°', w: '30°', a: 'x' },
+                        equationPreview: `<span class="math-var">x</span> = 35° + 45° + 30°`,
+                        answer: 110,
+                        stepsHTML: `<span class="math-var">x</span> = 80° + 30° = <b class="text-[#39ff14]">110°</b>`
+                    },
+                    {
+                        prompt: `En un Bumerán, el ángulo exterior cóncavo mide <span class="math-expr"><span class="math-var">α</span> = 125°</span> y dos puntas miden <span class="math-expr"><span class="math-var">β</span> = 40°</span> y <span class="math-expr"><span class="math-var">θ</span> = 50°</span>. Halla <span class="math-expr"><span class="math-var">ω</span> = <span class="math-var">x</span></span>:`,
+                        given: [`α = 125°`, `β = 40°`, `θ = 50°`, `ω = x`],
+                        diagramLabels: { b: '40°', t: '50°', w: 'x', a: '125°' },
+                        equationPreview: `125° = 40° + 50° + <span class="math-var">x</span>`,
+                        answer: 35,
+                        stepsHTML: `125° = 90° + <span class="math-var">x</span> &nbsp;⇒&nbsp; <span class="math-var">x</span> = 125° − 90° = <b class="text-[#39ff14]">35°</b>`
+                    }
+                ]
+            },
+            {
+                id: 5,
+                group: 'AUXILIARES',
+                groupBadge: 'PROPIEDAD AUXILIAR 2',
+                shortTitle: 'Propiedad de la Mariposa',
+                tag: 'La Mariposa (Corbatita)',
+                borderColor: 'border-pink-500',
+                accentHex: '#fe0979',
+                formulaHTML: `<span class="math-var">β</span> + <span class="math-var">θ</span> = <span class="math-var">α</span> + <span class="math-var">ω</span>`,
+                statement: `En la propiedad de la <b>Mariposa</b> (o Corbatita Michi), la suma de las dos puntas del ala izquierda (<span class="math-expr"><span class="math-var">β</span> + <span class="math-var">θ</span></span>) es igual a la suma de las dos puntas del ala derecha (<span class="math-expr"><span class="math-var">α</span> + <span class="math-var">ω</span></span>).`,
+                robotIntro: `¡Es la propiedad de la <b>Mariposa</b>! La suma de los dos ángulos del ala izquierda siempre es igual a la suma de los dos ángulos del ala derecha: <span class="math-expr"><span class="math-var">β</span> + <span class="math-var">θ</span> = <span class="math-var">α</span> + <span class="math-var">ω</span></span>.`,
+                sliders: [
+                    { key: 'b', label: 'Ala Izq. Sup. β', min: 25, max: 80, val: 50, color: '#00f2fe' },
+                    { key: 't', label: 'Ala Izq. Inf. θ', min: 25, max: 80, val: 60, color: '#facc15' },
+                    { key: 'a', label: 'Ala Der. Sup. α', min: 20, max: 75, val: 45, color: '#fe0979' }
+                ],
+                examples: [
+                    {
+                        prompt: `En la figura de la Mariposa, si <span class="math-expr"><span class="math-var">β</span> = 50°</span>, <span class="math-expr"><span class="math-var">θ</span> = 60°</span> y <span class="math-expr"><span class="math-var">α</span> = 40°</span>, calcula el valor de <span class="math-expr"><span class="math-var">ω</span> = <span class="math-var">x</span></span>:`,
+                        given: [`β = 50°`, `θ = 60°`, `α = 40°`, `ω = x`],
+                        diagramLabels: { b: '50°', t: '60°', a: '40°', w: 'x' },
+                        equationPreview: `50° + 60° = 40° + <span class="math-var">x</span>`,
+                        answer: 70,
+                        stepsHTML: `110° = 40° + <span class="math-var">x</span> &nbsp;⇒&nbsp; <span class="math-var">x</span> = 110° − 40° = <b class="text-[#39ff14]">70°</b>`
+                    },
+                    {
+                        prompt: `En una Mariposa, el ala izquierda tiene ángulos de <span class="math-expr">3<span class="math-var">x</span></span> y <span class="math-expr">35°</span>, y el ala derecha tiene <span class="math-expr">2<span class="math-var">x</span></span> y <span class="math-expr">60°</span>. Halla <span class="math-expr math-var">x</span>:`,
+                        given: [`β = 3x`, `θ = 35°`, `α = 2x`, `ω = 60°`],
+                        diagramLabels: { b: '3x', t: '35°', a: '2x', w: '60°' },
+                        equationPreview: `3<span class="math-var">x</span> + 35° = 2<span class="math-var">x</span> + 60°`,
+                        answer: 25,
+                        stepsHTML: `3<span class="math-var">x</span> − 2<span class="math-var">x</span> = 60° − 35° &nbsp;⇒&nbsp; <span class="math-var">x</span> = <b class="text-[#39ff14]">25°</b>`
+                    }
+                ]
+            },
+            {
+                id: 6,
+                group: 'AUXILIARES',
+                groupBadge: 'PROPIEDAD AUXILIAR 3',
+                shortTitle: 'Propiedad del Pescadito',
+                tag: 'El Pescadito',
+                borderColor: 'border-purple-500',
+                accentHex: '#bf00ff',
+                formulaHTML: `<span class="math-var">y</span> + <span class="math-var">z</span> = <span class="math-var">α</span> + <span class="math-var">β</span>`,
+                statement: `En la propiedad del <b>Pescadito</b>, la suma de los ángulos internos de la cabeza y la cola (<span class="math-expr"><span class="math-var">y</span> + <span class="math-var">z</span></span>) es igual a la suma de los dos ángulos exteriores de las aletas (<span class="math-expr"><span class="math-var">α</span> + <span class="math-var">β</span></span>).`,
+                robotIntro: `¡Mira la figura del <b>Pescadito</b>! Cabeza más cola (<span class="math-expr"><span class="math-var">y</span> + <span class="math-var">z</span></span>) es igual a la suma de las dos aletas exteriores (<span class="math-expr"><span class="math-var">α</span> + <span class="math-var">β</span></span>).`,
+                sliders: [
+                    { key: 'y', label: 'Cabeza (y)', min: 30, max: 85, val: 55, color: '#00f2fe' },
+                    { key: 'z', label: 'Cola (z)', min: 30, max: 85, val: 65, color: '#39ff14' },
+                    { key: 'a', label: 'Aleta Sup. (α)', min: 30, max: 85, val: 60, color: '#facc15' }
+                ],
+                examples: [
+                    {
+                        prompt: `En el Pescadito, la cabeza mide <span class="math-expr"><span class="math-var">y</span> = 50°</span>, la cola mide <span class="math-expr"><span class="math-var">z</span> = 70°</span> y la aleta superior <span class="math-expr"><span class="math-var">α</span> = 65°</span>. Halla la aleta inferior <span class="math-expr"><span class="math-var">β</span> = <span class="math-var">x</span></span>:`,
+                        given: [`y = 50°`, `z = 70°`, `α = 65°`, `β = x`],
+                        diagramLabels: { y: '50°', z: '70°', a: '65°', b: 'x' },
+                        equationPreview: `50° + 70° = 65° + <span class="math-var">x</span>`,
+                        answer: 55,
+                        stepsHTML: `120° = 65° + <span class="math-var">x</span> &nbsp;⇒&nbsp; <span class="math-var">x</span> = 120° − 65° = <b class="text-[#39ff14]">55°</b>`
+                    },
+                    {
+                        prompt: `En un Pescadito, las aletas exteriores miden <span class="math-expr"><span class="math-var">α</span> = 75°</span> y <span class="math-expr"><span class="math-var">β</span> = 85°</span>. Si la cabeza mide <span class="math-expr"><span class="math-var">y</span> = 3<span class="math-var">x</span></span> y la cola <span class="math-expr"><span class="math-var">z</span> = <span class="math-var">x</span></span>, halla <span class="math-expr math-var">x</span>:`,
+                        given: [`y = 3x`, `z = x`, `α = 75°`, `β = 85°`],
+                        diagramLabels: { y: '3x', z: 'x', a: '75°', b: '85°' },
+                        equationPreview: `3<span class="math-var">x</span> + <span class="math-var">x</span> = 75° + 85°`,
+                        answer: 40,
+                        stepsHTML: `4<span class="math-var">x</span> = 160° &nbsp;⇒&nbsp; <span class="math-var">x</span> = <span class="latex-frac"><span class="num">160°</span><span class="den">4</span></span> = <b class="text-[#39ff14]">40°</b>`
+                    }
+                ]
+            },
+
+            // ================= 7 AL 9: PROPIEDADES DE BISECTRICES =================
+            {
+                id: 7,
+                group: 'BISECTRICES',
+                groupBadge: 'TEOREMA DE BISECTRICES 1',
+                shortTitle: 'Dos Bisectrices Interiores',
+                tag: '2 Bisectrices Internas',
+                borderColor: 'border-cyan-400',
+                accentHex: '#00f2fe',
+                formulaHTML: `<span class="math-var">x</span> = 90° + <span class="latex-frac"><span class="num"><span class="math-var">θ</span></span><span class="den">2</span></span>`,
+                statement: `El ángulo <span class="math-expr math-var">x</span> formado por dos <b>bisectrices interiores</b> de un triángulo es igual a <span class="math-expr">90°</span> más la mitad del tercer ángulo interior (<span class="math-expr math-var">θ</span>).`,
+                robotIntro: `¡Cuando dos bisectrices se cruzan <b>adentro</b> del triángulo (en el incentro <span class="math-expr">I</span>), usa suma! <span class="math-expr"><span class="math-var">x</span> = 90° + <span class="math-var">θ</span>/2</span>.`,
+                sliders: [
+                    { key: 'theta', label: 'Ángulo superior θ', min: 20, max: 120, val: 60, color: '#facc15' }
+                ],
+                examples: [
+                    {
+                        prompt: `En el triángulo <span class="math-expr">ABC</span>, <span class="math-expr">AI</span> y <span class="math-expr">CI</span> son bisectrices interiores. Si el ángulo en <span class="math-expr">B</span> mide <span class="math-expr"><span class="math-var">θ</span> = 70°</span>, calcula <span class="math-expr math-var">x</span>:`,
+                        given: [`θ = 70°`, `Bisectrices internas AI y CI`, `Incógnita = x`],
+                        diagramLabels: { top: '70°', x: 'x' },
+                        equationPreview: `<span class="math-var">x</span> = 90° + <span class="latex-frac"><span class="num">70°</span><span class="den">2</span></span>`,
+                        answer: 125,
+                        stepsHTML: `<span class="math-var">x</span> = 90° + 35° = <b class="text-[#39ff14]">125°</b>`
+                    },
+                    {
+                        prompt: `Si el ángulo formado por dos bisectrices interiores mide <span class="math-expr"><span class="math-var">x</span> = 115°</span>, ¿cuánto mide el ángulo superior <span class="math-expr math-var">θ</span>? (Ingresa <span class="math-expr math-var">θ</span>):`,
+                        given: [`Ángulo en I = 115°`, `Ángulo en B = θ`],
+                        diagramLabels: { top: 'θ', x: '115°' },
+                        equationPreview: `115° = 90° + <span class="latex-frac"><span class="num"><span class="math-var">θ</span></span><span class="den">2</span></span>`,
+                        answer: 50,
+                        stepsHTML: `<span class="latex-frac"><span class="num"><span class="math-var">θ</span></span><span class="den">2</span></span> = 115° − 90° = 25° &nbsp;⇒&nbsp; <span class="math-var">θ</span> = <b class="text-[#39ff14]">50°</b>`
+                    }
+                ]
+            },
+            {
+                id: 8,
+                group: 'BISECTRICES',
+                groupBadge: 'TEOREMA DE BISECTRICES 2',
+                shortTitle: 'Dos Bisectrices Exteriores',
+                tag: '2 Bisectrices Externas',
+                borderColor: 'border-yellow-400',
+                accentHex: '#facc15',
+                formulaHTML: `<span class="math-var">x</span> = 90° − <span class="latex-frac"><span class="num"><span class="math-var">ω</span></span><span class="den">2</span></span>`,
+                statement: `El ángulo <span class="math-expr math-var">x</span> formado por dos <b>bisectrices exteriores</b> de un triángulo es igual a <span class="math-expr">90°</span> menos la mitad del tercer ángulo interior (<span class="math-expr math-var">ω</span>).`,
+                robotIntro: `¡Cuando dos bisectrices se cruzan <b>afuera</b> del triángulo (en el excentro <span class="math-expr">E</span>), usa resta! <span class="math-expr"><span class="math-var">x</span> = 90° − <span class="math-var">ω</span>/2</span>.`,
+                sliders: [
+                    { key: 'omega', label: 'Ángulo interior ω', min: 20, max: 120, val: 50, color: '#00f2fe' }
+                ],
+                examples: [
+                    {
+                        prompt: `En el triángulo <span class="math-expr">ABC</span>, <span class="math-expr">AE</span> y <span class="math-expr">CE</span> son bisectrices exteriores. Si <span class="math-expr"><span class="math-var">ω</span> = 64°</span>, calcula el valor de <span class="math-expr math-var">x</span>:`,
+                        given: [`ω = 64°`, `Bisectrices externas AE y CE`, `Incógnita = x`],
+                        diagramLabels: { top: '64°', x: 'x' },
+                        equationPreview: `<span class="math-var">x</span> = 90° − <span class="latex-frac"><span class="num">64°</span><span class="den">2</span></span>`,
+                        answer: 58,
+                        stepsHTML: `<span class="math-var">x</span> = 90° − 32° = <b class="text-[#39ff14]">58°</b>`
+                    },
+                    {
+                        prompt: `Si el ángulo entre dos bisectrices exteriores mide <span class="math-expr"><span class="math-var">x</span> = 50°</span>, calcula la medida del ángulo interior <span class="math-expr math-var">ω</span>:`,
+                        given: [`Ángulo exterior E = 50°`, `Ángulo en B = ω`],
+                        diagramLabels: { top: 'ω', x: '50°' },
+                        equationPreview: `50° = 90° − <span class="latex-frac"><span class="num"><span class="math-var">ω</span></span><span class="den">2</span></span>`,
+                        answer: 80,
+                        stepsHTML: `<span class="latex-frac"><span class="num"><span class="math-var">ω</span></span><span class="den">2</span></span> = 90° − 50° = 40° &nbsp;⇒&nbsp; <span class="math-var">ω</span> = <b class="text-[#39ff14]">80°</b>`
+                    }
+                ]
+            },
+            {
+                id: 9,
+                group: 'BISECTRICES',
+                groupBadge: 'TEOREMA DE BISECTRICES 3',
+                shortTitle: 'Bisectriz Interior y Exterior',
+                tag: '1 Interna y 1 Externa',
+                borderColor: 'border-pink-500',
+                accentHex: '#fe0979',
+                formulaHTML: `<span class="math-var">x</span> = <span class="latex-frac"><span class="num"><span class="math-var">ϕ</span></span><span class="den">2</span></span>`,
+                statement: `El ángulo <span class="math-expr math-var">x</span> formado por una <b>bisectriz interior</b> y una <b>bisectriz exterior</b> que parten de dos vértices diferentes es igual a la mitad del tercer ángulo interior (<span class="math-expr"><span class="math-var">ϕ</span>/2</span>).`,
+                robotIntro: `¡Una bisectriz interna y otra externa! El ángulo <span class="math-expr math-var">x</span> en el punto <span class="math-expr">E</span> es exactamente la mitad del ángulo <span class="math-expr math-var">ϕ</span>: <span class="math-expr"><span class="math-var">x</span> = <span class="math-var">ϕ</span>/2</span>.`,
+                sliders: [
+                    { key: 'phi', label: 'Ángulo interior ϕ', min: 20, max: 130, val: 76, color: '#39ff14' }
+                ],
+                examples: [
+                    {
+                        prompt: `En el triángulo <span class="math-expr">ABC</span>, se traza la bisectriz interior <span class="math-expr">AE</span> y la exterior <span class="math-expr">CE</span>. Si <span class="math-expr"><span class="math-var">ϕ</span> = 84°</span>, calcula <span class="math-expr math-var">x</span>:`,
+                        given: [`ϕ = 84°`, `1 Bisectriz interna y 1 externa`, `Incógnita = x`],
+                        diagramLabels: { phi: '84°', x: 'x' },
+                        equationPreview: `<span class="math-var">x</span> = <span class="latex-frac"><span class="num">84°</span><span class="den">2</span></span>`,
+                        answer: 42,
+                        stepsHTML: `<span class="math-var">x</span> = <span class="latex-frac"><span class="num">84°</span><span class="den">2</span></span> = <b class="text-[#39ff14]">42°</b>`
+                    },
+                    {
+                        prompt: `Si el ángulo entre la bisectriz interior <span class="math-expr">AE</span> y la exterior <span class="math-expr">CE</span> mide <span class="math-expr"><span class="math-var">x</span> = 38°</span>, calcula el ángulo <span class="math-expr math-var">ϕ</span>:`,
+                        given: [`x = 38°`, `Ángulo en B = ϕ`],
+                        diagramLabels: { phi: 'ϕ', x: '38°' },
+                        equationPreview: `38° = <span class="latex-frac"><span class="num"><span class="math-var">ϕ</span></span><span class="den">2</span></span>`,
+                        answer: 76,
+                        stepsHTML: `<span class="math-var">ϕ</span> = 38° · 2 = <b class="text-[#39ff14]">76°</b>`
+                    }
+                ]
+            }
+        ];
+
+        let currentTheoremIdx = 0;
+        let currentDiagramMode = 'EXPLORE'; // 'EXPLORE', 'EX1', 'EX2'
+        let angleTooltipsEnabled = true;
+        let sliderState = {};
+        let solvedState = { ex1: false, ex2: false };
+        let demoTimers = [];
+
+        const DEFAULT_VERTICES = {
+            1: { A: { x: 140, y: 315 }, B: { x: 335, y: 68 }, C: { x: 540, y: 315 } },
+            2: { A: { x: 115, y: 315 }, B: { x: 295, y: 72 }, C: { x: 455, y: 315 } },
+            3: { A: { x: 185, y: 280 }, B: { x: 320, y: 85 }, C: { x: 485, y: 280 } },
+            4: { B: { x: 350, y: 52 }, A: { x: 125, y: 325 }, D: { x: 345, y: 210 }, C: { x: 555, y: 325 } },
+            5: { A: { x: 135, y: 72 }, B: { x: 115, y: 320 }, C: { x: 545, y: 72 }, D: { x: 545, y: 320 } },
+            6: { A: { x: 125, y: 205 }, B: { x: 335, y: 78 }, C: { x: 545, y: 205 }, D: { x: 335, y: 332 } },
+            7: { A: { x: 130, y: 325 }, B: { x: 335, y: 62 }, C: { x: 545, y: 325 } },
+            8: { B: { x: 130, y: 208 }, C: { x: 340, y: 90 }, A: { x: 340, y: 326 } },
+            9: { A: { x: 120, y: 320 }, B: { x: 265, y: 105 }, C: { x: 405, y: 320 } }
+        };
+
+        let vertexState = {};
+        let draggingVertexKey = null;
+
+        function cloneDefaultVertices(thId) {
+            const src = DEFAULT_VERTICES[thId] || DEFAULT_VERTICES[1];
+            const copy = {};
+            Object.keys(src).forEach(k => {
+                copy[k] = { x: src[k].x, y: src[k].y };
+            });
+            return copy;
+        }
+
+        function dist2D(p1, p2) {
+            return Math.hypot(p2.x - p1.x, p2.y - p1.y);
+        }
+
+        function lerp2D(p1, p2, t) {
+            return { x: p1.x + (p2.x - p1.x) * t, y: p1.y + (p2.y - p1.y) * t };
+        }
+
+        function extendRay(fromPt, throughPt, len) {
+            const d = dist2D(fromPt, throughPt) || 1;
+            const ux = (throughPt.x - fromPt.x) / d;
+            const uy = (throughPt.y - fromPt.y) / d;
+            return { x: throughPt.x + ux * len, y: throughPt.y + uy * len };
+        }
+
+        function interiorAngleDeg(prevPt, vertexPt, nextPt) {
+            const v1x = prevPt.x - vertexPt.x;
+            const v1y = prevPt.y - vertexPt.y;
+            const v2x = nextPt.x - vertexPt.x;
+            const v2y = nextPt.y - vertexPt.y;
+            const m1 = Math.hypot(v1x, v1y) || 1;
+            const m2 = Math.hypot(v2x, v2y) || 1;
+            const cosVal = Math.max(-1, Math.min(1, (v1x * v2x + v1y * v2y) / (m1 * m2)));
+            return Math.acos(cosVal) * (180 / Math.PI);
+        }
+
+        function lineIntersection2D(p1, p2, p3, p4) {
+            const denom = (p1.x - p2.x) * (p3.y - p4.y) - (p1.y - p2.y) * (p3.x - p4.x);
+            if (Math.abs(denom) < 1e-5) return { x: (p2.x + p3.x) / 2, y: (p2.y + p3.y) / 2 };
+            const t = ((p1.x - p3.x) * (p3.y - p4.y) - (p1.y - p3.y) * (p3.x - p4.x)) / denom;
+            return {
+                x: p1.x + t * (p2.x - p1.x),
+                y: p1.y + t * (p2.y - p1.y)
+            };
+        }
+
+        // Genera un sector o arco SVG limpio entre dos puntos respecto a un vértice
+        function createAngleSectorSVG(v, p1, p2, radius, fillColor, strokeColor) {
+            const a1 = Math.atan2(p1.y - v.y, p1.x - v.x);
+            const a2 = Math.atan2(p2.y - v.y, p2.x - v.x);
+            let diff = a2 - a1;
+            while (diff <= -Math.PI) diff += 2 * Math.PI;
+            while (diff > Math.PI) diff -= 2 * Math.PI;
+            const sweepFlag = diff >= 0 ? 1 : 0;
+            const sx = v.x + radius * Math.cos(a1);
+            const sy = v.y + radius * Math.sin(a1);
+            const ex = v.x + radius * Math.cos(a2);
+            const ey = v.y + radius * Math.sin(a2);
+            return `<path d="M ${v.x} ${v.y} L ${sx} ${sy} A ${radius} ${radius} 0 0 ${sweepFlag} ${ex} ${ey} Z" fill="${fillColor}" stroke="${strokeColor}" stroke-width="2.2"/>`;
+        }
+
+        // Posición óptima para colocar la etiqueta de un ángulo en la bisectriz de sus dos lados
+        function getBisectorLabelPos(v, p1, p2, distOffset) {
+            const d1 = dist2D(v, p1) || 1;
+            const d2 = dist2D(v, p2) || 1;
+            let bx = (p1.x - v.x) / d1 + (p2.x - v.x) / d2;
+            let by = (p1.y - v.y) / d1 + (p2.y - v.y) / d2;
+            const bm = Math.hypot(bx, by) || 1;
+            return {
+                x: Math.max(42, Math.min(638, v.x + (bx / bm) * distOffset)),
+                y: Math.max(26, Math.min(358, v.y + (by / bm) * distOffset))
+            };
+        }
+
+        let audioEnabled = true;
+        let synth = null;
+        let polySynth = null;
+
+        async function ensureAudioReady() {
+            if (!audioEnabled) return false;
+            try {
+                if (Tone.context.state !== 'running') {
+                    await Tone.start();
+                }
+                if (!synth) {
+                    synth = new Tone.Synth({
+                        oscillator: { type: "triangle" },
+                        envelope: { attack: 0.01, decay: 0.12, sustain: 0.05, release: 0.2 }
+                    }).toDestination();
+                }
+                if (!polySynth) {
+                    polySynth = new Tone.PolySynth(Tone.Synth, {
+                        oscillator: { type: "sawtooth" },
+                        envelope: { attack: 0.02, decay: 0.2, sustain: 0.15, release: 0.4 }
+                    }).toDestination();
+                    polySynth.volume.value = -8;
+                }
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        async function playSound(type, stepIndex = 0) {
+            if (!audioEnabled) return;
+            const ready = await ensureAudioReady();
+            if (!ready) return;
+
+            const now = Tone.now();
+            const scaleNotes = ["C4", "E4", "G4", "A4", "C5", "D5", "E5"];
+            try {
+                if (type === 'valid') {
+                    synth.triggerAttackRelease(scaleNotes[stepIndex % scaleNotes.length], "16n", now);
+                    setRobotMood('happy');
+                } else if (type === 'hover') {
+                    synth.triggerAttackRelease("E5", "64n", now);
+                } else if (type === 'error') {
+                    synth.triggerAttackRelease("F#2", "8n", now);
+                    setRobotMood('alert');
+                } else if (type === 'switch') {
+                    synth.triggerAttackRelease("A4", "32n", now);
+                    synth.triggerAttackRelease("E5", "16n", now + 0.06);
+                } else if (type === 'celebrate') {
+                    polySynth.triggerAttackRelease(["C4", "E4", "G4", "C5"], "8n", now);
+                    polySynth.triggerAttackRelease(["F4", "A4", "C5", "F5"], "8n", now + 0.16);
+                    polySynth.triggerAttackRelease(["G4", "B4", "D5", "G5"], "4n", now + 0.32);
+                    setRobotMood('celebrate');
+                }
+            } catch (e) {}
+        }
+
+        function toggleAudio() {
+            audioEnabled = !audioEnabled;
+            const icon = document.getElementById('soundIcon');
+            const text = document.getElementById('soundText');
+            if (audioEnabled) {
+                icon.className = "fa-solid fa-volume-high text-cyan-400";
+                if (text) text.textContent = "SONIDO ON";
+                playSound('switch');
+            } else {
+                icon.className = "fa-solid fa-volume-xmark text-pink-500";
+                if (text) text.textContent = "SILENCIO";
+            }
+        }
+
+        let robotScene, robotCamera, robotRenderer, headGroup, leftEye, rightEye, leftBrow, rightBrow, mouthSegments = [], antennaBall;
+        let robotMood = 'idle';
+        let moodTimer = 0;
+        let isDraggingRobot = false;
+        let prevRobotX = 0, prevRobotY = 0;
+
+        function initRobot3D() {
+            const container = document.getElementById('robotCanvasContainer');
+            const width = container.clientWidth || 128;
+            const height = container.clientHeight || 128;
+
+            robotScene = new THREE.Scene();
+            robotCamera = new THREE.PerspectiveCamera(36, width / height, 0.1, 100);
+            robotCamera.position.set(0, 0.05, 3.35);
+
+            robotRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            robotRenderer.setSize(width, height);
+            robotRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            container.appendChild(robotRenderer.domElement);
+
+            robotScene.add(new THREE.AmbientLight(0xffffff, 0.95));
+            const cyanLight = new THREE.PointLight(0x00f2fe, 2.5, 12);
+            cyanLight.position.set(2.5, 2.5, 3.5);
+            robotScene.add(cyanLight);
+
+            const pinkLight = new THREE.PointLight(0xfe0979, 2.2, 12);
+            pinkLight.position.set(-2.5, -1.8, 3);
+            robotScene.add(pinkLight);
+
+            headGroup = new THREE.Group();
+            robotScene.add(headGroup);
+
+            const helmetMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.75, roughness: 0.25 });
+            const trimCyanMat = new THREE.MeshStandardMaterial({ color: 0x00f2fe, emissive: 0x00f2fe, emissiveIntensity: 0.75 });
+            const goldMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, emissive: 0xfacc15, emissiveIntensity: 0.85 });
+            const greenMat = new THREE.MeshStandardMaterial({ color: 0x39ff14, emissive: 0x39ff14, emissiveIntensity: 0.9 });
+            const pinkMat = new THREE.MeshStandardMaterial({ color: 0xfe0979, emissive: 0xfe0979, emissiveIntensity: 0.9 });
+
+            headGroup.add(new THREE.Mesh(new THREE.BoxGeometry(1.75, 1.42, 1.25), helmetMat));
+
+            const crestMesh = new THREE.Mesh(new THREE.BoxGeometry(0.45, 0.22, 1.32), trimCyanMat);
+            crestMesh.position.set(0, 0.74, 0);
+            headGroup.add(crestMesh);
+
+            const screenMesh = new THREE.Mesh(new THREE.BoxGeometry(1.52, 1.06, 0.12), new THREE.MeshBasicMaterial({ color: 0x05050d }));
+            screenMesh.position.set(0, -0.02, 0.61);
+            headGroup.add(screenMesh);
+
+            const eyeGeo = new THREE.SphereGeometry(0.19, 24, 24);
+            leftEye = new THREE.Mesh(eyeGeo, greenMat.clone());
+            leftEye.scale.set(1.1, 1.15, 0.45);
+            leftEye.position.set(-0.38, 0.12, 0.66);
+            headGroup.add(leftEye);
+
+            rightEye = new THREE.Mesh(eyeGeo, greenMat.clone());
+            rightEye.scale.set(1.1, 1.15, 0.45);
+            rightEye.position.set(0.38, 0.12, 0.66);
+            headGroup.add(rightEye);
+
+            const browGeo = new THREE.BoxGeometry(0.36, 0.065, 0.08);
+            leftBrow = new THREE.Mesh(browGeo, goldMat.clone());
+            leftBrow.position.set(-0.38, 0.36, 0.69);
+            headGroup.add(leftBrow);
+
+            rightBrow = new THREE.Mesh(browGeo, goldMat.clone());
+            rightBrow.position.set(0.38, 0.36, 0.69);
+            headGroup.add(rightBrow);
+
+            mouthSegments = [];
+            const segGeo = new THREE.BoxGeometry(0.13, 0.07, 0.08);
+            [-0.32, -0.16, 0, 0.16, 0.32].forEach((xPos, i) => {
+                const seg = new THREE.Mesh(segGeo, trimCyanMat.clone());
+                const curveY = (i === 0 || i === 4) ? -0.24 : (i === 1 || i === 3) ? -0.30 : -0.32;
+                seg.position.set(xPos, curveY, 0.68);
+                headGroup.add(seg);
+                mouthSegments.push(seg);
+            });
+
+            const earGeo = new THREE.CylinderGeometry(0.28, 0.28, 0.18, 20);
+            earGeo.rotateZ(Math.PI / 2);
+            const leftEar = new THREE.Mesh(earGeo, trimCyanMat);
+            leftEar.position.set(-0.95, 0, 0);
+            headGroup.add(leftEar);
+
+            const rightEar = new THREE.Mesh(earGeo, trimCyanMat);
+            rightEar.position.set(0.95, 0, 0);
+            headGroup.add(rightEar);
+
+            const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.38), goldMat);
+            rod.position.set(0, 0.92, 0);
+            headGroup.add(rod);
+
+            antennaBall = new THREE.Mesh(new THREE.SphereGeometry(0.14, 16, 16), pinkMat.clone());
+            antennaBall.position.set(0, 1.14, 0);
+            headGroup.add(antennaBall);
+
+            container.addEventListener('mousedown', (e) => {
+                isDraggingRobot = true;
+                prevRobotX = e.clientX;
+                prevRobotY = e.clientY;
+            });
+            window.addEventListener('mouseup', () => isDraggingRobot = false);
+            window.addEventListener('mousemove', (e) => {
+                if (!isDraggingRobot) return;
+                headGroup.rotation.y = Math.max(-0.65, Math.min(0.65, headGroup.rotation.y + (e.clientX - prevRobotX) * 0.015));
+                headGroup.rotation.x = Math.max(-0.35, Math.min(0.35, headGroup.rotation.x + (e.clientY - prevRobotY) * 0.015));
+                prevRobotX = e.clientX;
+                prevRobotY = e.clientY;
+            });
+        }
+
+        function setRobotMood(mood) {
+            robotMood = mood;
+            moodTimer = 110;
+            if (!leftEye || !rightEye || !antennaBall) return;
+
+            const badge = document.getElementById('robotMoodBadgeText');
+            const dot = document.getElementById('robotStatusDot');
+            const applyColor = (mesh, hex) => {
+                mesh.material.color.setHex(hex);
+                if (mesh.material.emissive) mesh.material.emissive.setHex(hex);
+            };
+
+            if (mood === 'happy') {
+                if (badge) badge.textContent = "¡CORRECTO!";
+                if (dot) dot.className = "w-2 h-2 rounded-full bg-[#39ff14] animate-ping";
+                applyColor(leftEye, 0x39ff14);
+                applyColor(rightEye, 0x39ff14);
+                applyColor(antennaBall, 0x00f2fe);
+                leftBrow.rotation.z = 0.15;
+                rightBrow.rotation.z = -0.15;
+            } else if (mood === 'thinking') {
+                if (badge) badge.textContent = "PISTA IA";
+                if (dot) dot.className = "w-2 h-2 rounded-full bg-[#facc15] animate-ping";
+                applyColor(leftEye, 0xfacc15);
+                applyColor(rightEye, 0x00f2fe);
+                applyColor(antennaBall, 0xfacc15);
+            } else if (mood === 'alert') {
+                if (badge) badge.textContent = "REVISA";
+                if (dot) dot.className = "w-2 h-2 rounded-full bg-[#fe0979] animate-ping";
+                applyColor(leftEye, 0xfe0979);
+                applyColor(rightEye, 0xfe0979);
+                applyColor(antennaBall, 0xfe0979);
+                leftBrow.rotation.z = -0.25;
+                rightBrow.rotation.z = 0.25;
+            } else if (mood === 'celebrate') {
+                if (badge) badge.textContent = "¡2/2 EXCELENTE!";
+                if (dot) dot.className = "w-2 h-2 rounded-full bg-[#facc15] animate-ping";
+                applyColor(leftEye, 0xfacc15);
+                applyColor(rightEye, 0xfacc15);
+                applyColor(antennaBall, 0x39ff14);
+            }
+        }
+
+        function updateRobotSpeech(html) {
+            document.getElementById('robotMessage').innerHTML = html;
+        }
+
+        function getCoverMiniSvg(id) {
+            switch (id) {
+                case 1: // Suma internos 180
+                    return `<svg viewBox="0 0 100 80" class="w-full h-full">
+                        <polygon points="50,12 14,68 86,68" fill="rgba(0,242,254,0.16)" stroke="#00f2fe" stroke-width="3" stroke-linejoin="round"/>
+                        <circle cx="50" cy="24" r="4" fill="#facc15"/><circle cx="26" cy="60" r="4" fill="#00f2fe"/><circle cx="74" cy="60" r="4" fill="#fe0979"/>
+                    </svg>`;
+                case 2: // Ángulo exterior
+                    return `<svg viewBox="0 0 100 80" class="w-full h-full">
+                        <polygon points="42,14 12,66 68,66" fill="rgba(250,204,21,0.16)" stroke="#facc15" stroke-width="3" stroke-linejoin="round"/>
+                        <line x1="68" y1="66" x2="94" y2="66" stroke="#39ff14" stroke-width="3"/>
+                        <path d="M 78,66 A 12,12 0 0 0 61,55" fill="none" stroke="#fe0979" stroke-width="3"/>
+                    </svg>`;
+                case 3: // Suma externos 360
+                    return `<svg viewBox="0 0 100 80" class="w-full h-full">
+                        <polygon points="50,20 22,62 78,62" fill="rgba(57,255,20,0.15)" stroke="#39ff14" stroke-width="2.8"/>
+                        <line x1="22" y1="62" x2="92" y2="62" stroke="#00f2fe" stroke-width="2.5"/>
+                        <line x1="50" y1="20" x2="58" y2="6" stroke="#facc15" stroke-width="2.5"/>
+                        <line x1="22" y1="62" x2="14" y2="75" stroke="#fe0979" stroke-width="2.5"/>
+                    </svg>`;
+                case 4: // Bumerán
+                    return `<svg viewBox="0 0 100 80" class="w-full h-full">
+                        <polygon points="56,10 14,68 52,46 86,68" fill="rgba(255,94,0,0.22)" stroke="#ff5e00" stroke-width="3" stroke-linejoin="round"/>
+                        <circle cx="52" cy="46" r="4.5" fill="#facc15"/>
+                    </svg>`;
+                case 5: // Mariposa
+                    return `<svg viewBox="0 0 100 80" class="w-full h-full">
+                        <polygon points="16,14 16,68 50,41" fill="rgba(254,9,121,0.22)" stroke="#fe0979" stroke-width="3" stroke-linejoin="round"/>
+                        <polygon points="84,14 84,68 50,41" fill="rgba(0,242,254,0.22)" stroke="#00f2fe" stroke-width="3" stroke-linejoin="round"/>
+                    </svg>`;
+                case 6: // Pescadito
+                    return `<svg viewBox="0 0 100 80" class="w-full h-full">
+                        <polygon points="14,40 48,14 86,40 48,66" fill="rgba(191,0,255,0.2)" stroke="#bf00ff" stroke-width="3" stroke-linejoin="round"/>
+                        <line x1="48" y1="14" x2="64" y2="4" stroke="#facc15" stroke-width="2.8"/>
+                        <line x1="48" y1="66" x2="64" y2="76" stroke="#facc15" stroke-width="2.8"/>
+                    </svg>`;
+                case 7: // 2 Bisectrices internas
+                    return `<svg viewBox="0 0 100 80" class="w-full h-full">
+                        <polygon points="50,12 14,68 86,68" fill="rgba(0,242,254,0.14)" stroke="#00f2fe" stroke-width="2.8"/>
+                        <polyline points="14,68 50,46 86,68" fill="none" stroke="#facc15" stroke-width="2.8" stroke-dasharray="4 2"/>
+                        <circle cx="50" cy="46" r="4.5" fill="#fe0979"/>
+                    </svg>`;
+                case 8: // 2 Bisectrices externas
+                    return `<svg viewBox="0 0 100 80" class="w-full h-full">
+                        <polygon points="14,40 52,16 52,64" fill="rgba(250,204,21,0.16)" stroke="#00f2fe" stroke-width="2.8"/>
+                        <polyline points="52,16 86,40 52,64" fill="none" stroke="#facc15" stroke-width="2.8"/>
+                        <circle cx="86" cy="40" r="4.5" fill="#39ff14"/>
+                    </svg>`;
+                case 9: // 1 Interna y 1 Externa
+                    return `<svg viewBox="0 0 100 80" class="w-full h-full">
+                        <polygon points="16,64 38,22 60,64" fill="rgba(254,9,121,0.18)" stroke="#00f2fe" stroke-width="2.8"/>
+                        <polyline points="16,64 88,24 60,64" fill="none" stroke="#fe0979" stroke-width="2.6"/>
+                        <circle cx="88" cy="24" r="4.5" fill="#facc15"/>
+                    </svg>`;
+            }
+        }
+
+        function renderCoverAndNav() {
+            const grid = document.getElementById('coverCardsGrid');
+            grid.innerHTML = THEOREMS_DATA.map((th, idx) => `
+                <div onclick="enterTheoremFromCover(${idx})" class="group cursor-pointer bg-slate-900/85 hover:bg-slate-800/95 border-[3px] border-slate-700 hover:${th.borderColor} p-4 rounded-[2rem] transition-all duration-300 flex flex-col justify-between shadow-xl hover:shadow-[0_0_30px_rgba(0,242,254,0.28)]">
+                    <div class="flex items-center gap-3.5 mb-3">
+                        <div class="w-16 h-16 shrink-0 rounded-2xl bg-black border-2 border-white/15 flex items-center justify-center p-1.5 group-hover:scale-105 transition-transform">
+                            ${getCoverMiniSvg(th.id)}
+                        </div>
+                        <div>
+                            <span class="inline-block bg-black/80 text-cyan-300 border border-cyan-700/70 px-2.5 py-0.5 rounded-full font-black text-[10px] tracking-widest uppercase mb-1">
+                                ${th.groupBadge}
+                            </span>
+                            <h3 class="text-base sm:text-lg font-black text-white leading-tight">${th.shortTitle}</h3>
+                            <p class="text-[11px] text-slate-400 font-bold mt-0.5">${th.tag} • 2 Ejemplos</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between pt-2.5 border-t border-white/10">
+                        <div class="math-expr text-sm sm:text-base font-bold text-yellow-300">${th.formulaHTML}</div>
+                        <span class="text-cyan-400 font-black text-xs uppercase flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                            PRACTICAR <i class="fa-solid fa-play text-[10px]"></i>
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+
+            const topNav = document.getElementById('topTheoremNav');
+            topNav.innerHTML = THEOREMS_DATA.map((th, idx) => `
+                <button onclick="selectTheorem(${idx})" id="thNavBtn-${idx}" class="px-2.5 py-1.5 rounded-xl font-black text-xs transition-all">
+                    ${idx + 1}) ${th.tag.split(' ')[0]}
+                </button>
+            `).join('');
+        }
+
+        function enterTheoremFromCover(index) {
+            document.getElementById('coverPortalSection').classList.add('hidden');
+            document.getElementById('labWorkspaceWrapper').classList.remove('hidden');
+            selectTheorem(index, false);
+            setTimeout(() => onWindowResize(), 50);
+        }
+
+        function openCoverPortal() {
+            clearDemoTimers();
+            playSound('switch');
+            document.getElementById('labWorkspaceWrapper').classList.add('hidden');
+            document.getElementById('coverPortalSection').classList.remove('hidden');
+        }
+
+        function angleBadgeGroup(x, y, labelHTML, bgColor, textColor = '#000000', descText = '') {
+            const safeDesc = descText.replace(/"/g, '&quot;');
+            const cleanText = labelHTML.replace(/<[^>]*>/g, '');
+            const boxW = Math.max(66, cleanText.length * 10.5 + 20);
+            return `
+                <g class="cursor-pointer transition-transform hover:scale-110"
+                   onmouseenter="onHoverAngleTag('${cleanText.replace(/'/g, "\\'")}', '${safeDesc}')">
+                    <rect x="${x - boxW / 2}" y="${y - 16}" width="${boxW}" height="32" rx="10"
+                          fill="${bgColor}" stroke="#ffffff" stroke-width="2"
+                          filter="drop-shadow(0 0 8px ${bgColor})"/>
+                    <text x="${x}" y="${y + 6}" text-anchor="middle"
+                          fill="${textColor}" font-family="KaTeX_Main, Times New Roman, serif"
+                          font-size="17" font-weight="bold">${labelHTML}</text>
+                </g>
+            `;
+        }
+
+        function vertexLabelSVG(x, y, letter, dragKey = null, centroid = { x: 340, y: 210 }) {
+            const dx = x - centroid.x;
+            const dy = y - centroid.y;
+            const dm = Math.hypot(dx, dy) || 1;
+            const lx = x + (dx / dm) * 24;
+            const ly = y + (dy / dm) * 24 + 6;
+
+            if (!dragKey) {
+                return `
+                    <g class="pointer-events-none">
+                        <circle cx="${x}" cy="${y}" r="5.5" fill="#ffffff" stroke="#fe0979" stroke-width="2.5"/>
+                        <text x="${lx}" y="${ly}" text-anchor="middle" fill="#f8fafc"
+                              font-family="KaTeX_Main, serif" font-size="18" font-weight="bold">${letter}</text>
+                    </g>
+                `;
+            }
+
+            const isDraggingThis = draggingVertexKey === dragKey;
+            return `
+                <g class="cursor-grab active:cursor-grabbing"
+                   onmousedown="startVertexDrag('${dragKey}', event)"
+                   ontouchstart="startVertexDrag('${dragKey}', event)">
+                    <circle cx="${x}" cy="${y}" r="22" fill="transparent"/>
+                    <circle cx="${x}" cy="${y}" r="${isDraggingThis ? 15 : 11}"
+                            fill="rgba(0, 242, 254, 0.25)" stroke="#00f2fe" stroke-width="1.8"
+                            stroke-dasharray="3 2"/>
+                    <circle cx="${x}" cy="${y}" r="${isDraggingThis ? 8.5 : 6.5}"
+                            fill="${isDraggingThis ? '#facc15' : '#ffffff'}"
+                            stroke="#00f2fe" stroke-width="3"
+                            filter="drop-shadow(0 0 10px #00f2fe)"/>
+                    <text x="${lx}" y="${ly}" text-anchor="middle" fill="#ffffff"
+                          font-family="KaTeX_Main, serif" font-size="19" font-weight="bold"
+                          style="text-shadow: 0 2px 6px #000" class="pointer-events-none">${letter}</text>
+                </g>
+            `;
+        }
+
+        function startVertexDrag(vertexKey, evt) {
+            evt.preventDefault();
+            evt.stopPropagation();
+            draggingVertexKey = vertexKey;
+            if (currentDiagramMode !== 'EXPLORE') {
+                switchDiagramViewMode('EXPLORE', true);
+            }
+            playSound('hover');
+            renderGeometrySVG();
+        }
+
+        function getSvgCoordsFromEvent(evt) {
+            const svg = document.getElementById('geometrySvgCanvas');
+            if (!svg) return null;
+            const rect = svg.getBoundingClientRect();
+            const clientX = evt.touches && evt.touches.length ? evt.touches[0].clientX : evt.clientX;
+            const clientY = evt.touches && evt.touches.length ? evt.touches[0].clientY : evt.clientY;
+            const scaleX = 680 / (rect.width || 680);
+            const scaleY = 420 / (rect.height || 420);
+            return {
+                x: (clientX - rect.left) * scaleX,
+                y: (clientY - rect.top) * scaleY
+            };
+        }
+
+        function handleGlobalVertexMove(evt) {
+            if (!draggingVertexKey) return;
+            const pt = getSvgCoordsFromEvent(evt);
+            if (!pt) return;
+
+            const thId = THEOREMS_DATA[currentTheoremIdx].id;
+            let nx = Math.max(65, Math.min(615, pt.x));
+            let ny = Math.max(48, Math.min(345, pt.y));
+
+            // Restricciones suaves para preservar la topología de cada teorema al arrastrar
+            if (thId === 2) {
+                if (draggingVertexKey === 'C') nx = Math.min(nx, 515);
+                if (draggingVertexKey === 'A') nx = Math.min(nx, vertexState.C.x - 90);
+            } else if (thId === 4) {
+                // En el Bumerán mantenemos D como vértice cóncavo interior
+                if (draggingVertexKey === 'D') {
+                    ny = Math.max(vertexState.B.y + 55, Math.min(285, ny));
+                    nx = Math.max(vertexState.A.x + 55, Math.min(vertexState.C.x - 55, nx));
+                }
+            } else if (thId === 5) {
+                // En la Mariposa mantenemos el ala izquierda a la izquierda y el ala derecha a la derecha
+                if (draggingVertexKey === 'A' || draggingVertexKey === 'B') nx = Math.min(nx, 275);
+                if (draggingVertexKey === 'C' || draggingVertexKey === 'D') nx = Math.max(nx, 405);
+                if (draggingVertexKey === 'A') ny = Math.min(ny, vertexState.B.y - 70);
+                if (draggingVertexKey === 'B') ny = Math.max(ny, vertexState.A.y + 70);
+                if (draggingVertexKey === 'C') ny = Math.min(ny, vertexState.D.y - 70);
+                if (draggingVertexKey === 'D') ny = Math.max(ny, vertexState.C.y + 70);
+            } else if (thId === 6) {
+                // En el Pescadito mantenemos cabeza, cola y aletas bien definidas
+                if (draggingVertexKey === 'A') nx = Math.min(nx, 235);
+                if (draggingVertexKey === 'C') nx = Math.max(nx, 445);
+                if (draggingVertexKey === 'B') { nx = Math.max(250, Math.min(420, nx)); ny = Math.min(ny, 155); }
+                if (draggingVertexKey === 'D') { nx = Math.max(250, Math.min(420, nx)); ny = Math.max(ny, 255); }
+            } else if (thId === 8) {
+                // Dos bisectrices exteriores
+                if (draggingVertexKey === 'B') nx = Math.min(nx, 230);
+                if (draggingVertexKey === 'C') { nx = Math.max(265, Math.min(410, nx)); ny = Math.min(ny, 165); }
+                if (draggingVertexKey === 'A') { nx = Math.max(265, Math.min(410, nx)); ny = Math.max(ny, 255); }
+            } else if (thId === 9) {
+                // Bisectriz interior y exterior: mantenemos espacio a la derecha para el excentro E
+                if (draggingVertexKey === 'A') { nx = Math.min(nx, 235); ny = Math.max(ny, 220); }
+                if (draggingVertexKey === 'C') { nx = Math.max(290, Math.min(445, nx)); ny = Math.max(ny, 220); }
+                if (draggingVertexKey === 'B') { nx = Math.max(160, Math.min(390, nx)); ny = Math.min(ny, 195); }
+            }
+
+            vertexState[draggingVertexKey] = { x: Math.round(nx), y: Math.round(ny) };
+            renderGeometrySVG();
+            renderSlidersForCurrentTheorem();
+        }
+
+        function stopVertexDrag() {
+            if (draggingVertexKey) {
+                draggingVertexKey = null;
+                renderGeometrySVG();
+            }
+        }
+
+        window.addEventListener('mousemove', handleGlobalVertexMove);
+        window.addEventListener('mouseup', stopVertexDrag);
+        window.addEventListener('touchmove', handleGlobalVertexMove, { passive: false });
+        window.addEventListener('touchend', stopVertexDrag);
+
+        function onHoverAngleTag(titleText, descText) {
+            if (!angleTooltipsEnabled) return;
+            playSound('hover');
+            document.getElementById('diagramOverlayTitle').innerHTML = `ÁNGULO SELECCIONADO: <span class="math-expr text-yellow-300">${titleText}</span>`;
+            document.getElementById('diagramOverlaySub').innerHTML = descText || 'Arrastra los vértices para ver cómo cambia este ángulo';
+        }
+
+        function toggleAngleTooltips() {
+            angleTooltipsEnabled = !angleTooltipsEnabled;
+            playSound('switch');
+            const btn = document.getElementById('toggleTooltipsBtn');
+            const txt = document.getElementById('toggleTooltipsText');
+            if (angleTooltipsEnabled) {
+                btn.className = "px-3 py-1.5 rounded-xl font-black text-xs bg-emerald-500 text-black border-b-2 border-emerald-800 transition-all flex items-center gap-1.5";
+                txt.textContent = "ETIQUETAS: ON";
+            } else {
+                btn.className = "px-3 py-1.5 rounded-xl font-black text-xs bg-slate-800 text-slate-300 border border-slate-600 transition-all flex items-center gap-1.5";
+                txt.textContent = "ETIQUETAS: OFF";
+            }
+            renderGeometrySVG();
+        }
+
+        function renderGeometrySVG() {
+            const svg = document.getElementById('geometrySvgCanvas');
+            const th = THEOREMS_DATA[currentTheoremIdx];
+            const liveEq = document.getElementById('liveCanvasEquation');
+
+            if (!vertexState || Object.keys(vertexState).length === 0) {
+                vertexState = cloneDefaultVertices(th.id);
+            }
+
+            let defs = `
+                <defs>
+                    <filter id="glowLine" x="-20%" y="-20%" width="140%" height="140%">
+                        <feGaussianBlur stdDeviation="3" result="blur" />
+                        <feMerge>
+                            <feMergeNode in="blur"/>
+                            <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                    </filter>
+                </defs>
+            `;
+
+            let content = '';
+            const isEx1 = currentDiagramMode === 'EX1';
+            const isEx2 = currentDiagramMode === 'EX2';
+            const exData = isEx1 ? th.examples[0] : isEx2 ? th.examples[1] : null;
+
+            if (th.id === 1) {
+                // 1. Suma de ángulos interiores = 180°
+                const { A, B, C } = vertexState;
+                const centroid = { x: (A.x + B.x + C.x) / 3, y: (A.y + B.y + C.y) / 3 };
+                const aVal = Math.round(interiorAngleDeg(B, A, C));
+                const bVal = Math.round(interiorAngleDeg(A, B, C));
+                const cVal = 180 - aVal - bVal;
+
+                const lblA = exData ? exData.diagramLabels.a : `α = ${aVal}°`;
+                const lblB = exData ? exData.diagramLabels.b : `β = ${bVal}°`;
+                const lblC = exData ? exData.diagramLabels.c : `θ = ${cVal}°`;
+
+                const posA = getBisectorLabelPos(A, B, C, 56);
+                const posB = getBisectorLabelPos(B, A, C, 56);
+                const posC = getBisectorLabelPos(C, A, B, 56);
+
+                content = `
+                    <polygon points="${A.x},${A.y} ${B.x},${B.y} ${C.x},${C.y}" fill="rgba(0,242,254,0.12)" stroke="#00f2fe" stroke-width="4" stroke-linejoin="round" filter="url(#glowLine)"/>
+                    ${createAngleSectorSVG(A, B, C, 38, 'rgba(0,242,254,0.28)', '#00f2fe')}
+                    ${createAngleSectorSVG(B, A, C, 38, 'rgba(250,204,21,0.28)', '#facc15')}
+                    ${createAngleSectorSVG(C, A, B, 38, 'rgba(254,9,121,0.28)', '#fe0979')}
+                    ${angleTooltipsEnabled ? `
+                        ${angleBadgeGroup(posA.x, posA.y, lblA, '#00f2fe', '#000', 'Ángulo interior en el vértice A')}
+                        ${angleBadgeGroup(posB.x, posB.y, lblB, '#facc15', '#000', 'Ángulo interior en el vértice B')}
+                        ${angleBadgeGroup(posC.x, posC.y, lblC, '#fe0979', '#fff', 'Ángulo interior en el vértice C')}
+                    ` : ''}
+                    ${vertexLabelSVG(A.x, A.y, 'A', 'A', centroid)}
+                    ${vertexLabelSVG(B.x, B.y, 'B', 'B', centroid)}
+                    ${vertexLabelSVG(C.x, C.y, 'C', 'C', centroid)}
+                `;
+                liveEq.innerHTML = exData
+                    ? exData.equationPreview
+                    : `<span class="text-cyan-300">${aVal}°</span> + <span class="text-yellow-300">${bVal}°</span> + <span class="text-pink-400">${cVal}°</span> = <b class="text-[#39ff14]">180°</b>`;
+
+            } else if (th.id === 2) {
+                // 2. Medida de un ángulo exterior: x = α + β
+                const { A, B, C } = vertexState;
+                const centroid = { x: (A.x + B.x + C.x) / 3, y: (A.y + B.y + C.y) / 3 };
+                const extPt = extendRay(A, C, 130);
+
+                const aVal = Math.round(interiorAngleDeg(B, A, C));
+                const bVal = Math.round(interiorAngleDeg(A, B, C));
+                const extVal = aVal + bVal;
+
+                const lblA = exData ? exData.diagramLabels.a : `α = ${aVal}°`;
+                const lblB = exData ? exData.diagramLabels.b : `β = ${bVal}°`;
+                const lblExt = exData ? exData.diagramLabels.ext : `x = ${extVal}°`;
+
+                const posA = getBisectorLabelPos(A, B, C, 56);
+                const posB = getBisectorLabelPos(B, A, C, 56);
+                const posExt = getBisectorLabelPos(C, B, extPt, 58);
+
+                content = `
+                    <line x1="${A.x}" y1="${A.y}" x2="${extPt.x}" y2="${extPt.y}" stroke="#39ff14" stroke-width="3.5" stroke-dasharray="8 4"/>
+                    <polygon points="${A.x},${A.y} ${B.x},${B.y} ${C.x},${C.y}" fill="rgba(250,204,21,0.12)" stroke="#00f2fe" stroke-width="4" stroke-linejoin="round" filter="url(#glowLine)"/>
+                    ${createAngleSectorSVG(A, B, C, 38, 'rgba(0,242,254,0.3)', '#00f2fe')}
+                    ${createAngleSectorSVG(B, A, C, 38, 'rgba(250,204,21,0.3)', '#facc15')}
+                    ${createAngleSectorSVG(C, B, extPt, 44, 'rgba(254,9,121,0.35)', '#fe0979')}
+                    ${angleTooltipsEnabled ? `
+                        ${angleBadgeGroup(posA.x, posA.y, lblA, '#00f2fe', '#000', 'Ángulo interior α no adyacente')}
+                        ${angleBadgeGroup(posB.x, posB.y, lblB, '#facc15', '#000', 'Ángulo interior β no adyacente')}
+                        ${angleBadgeGroup(posExt.x, posExt.y, lblExt, '#fe0979', '#fff', 'Ángulo exterior x = α + β')}
+                    ` : ''}
+                    ${vertexLabelSVG(A.x, A.y, 'A', 'A', centroid)}
+                    ${vertexLabelSVG(B.x, B.y, 'B', 'B', centroid)}
+                    ${vertexLabelSVG(C.x, C.y, 'C', 'C', centroid)}
+                `;
+                liveEq.innerHTML = exData
+                    ? exData.equationPreview
+                    : `<span class="text-pink-400">x = ${extVal}°</span> &nbsp;⇐&nbsp; <span class="text-cyan-300">${aVal}°</span> + <span class="text-yellow-300">${bVal}°</span> = <b class="text-[#39ff14]">${extVal}°</b>`;
+
+            } else if (th.id === 3) {
+                // 3. Suma de ángulos exteriores = 360°
+                const { A, B, C } = vertexState;
+                const centroid = { x: (A.x + B.x + C.x) / 3, y: (A.y + B.y + C.y) / 3 };
+                const extA = extendRay(B, A, 85);
+                const extB = extendRay(C, B, 85);
+                const extC = extendRay(A, C, 85);
+
+                const intA = Math.round(interiorAngleDeg(B, A, C));
+                const intB = Math.round(interiorAngleDeg(A, B, C));
+                const xVal = 180 - intA;
+                const yVal = 180 - intB;
+                const zVal = 360 - xVal - yVal;
+
+                const lblX = exData ? exData.diagramLabels.x : `x = ${xVal}°`;
+                const lblY = exData ? exData.diagramLabels.y : `y = ${yVal}°`;
+                const lblZ = exData ? exData.diagramLabels.z : `z = ${zVal}°`;
+
+                const posX = getBisectorLabelPos(A, extA, C, 54);
+                const posY = getBisectorLabelPos(B, extB, A, 54);
+                const posZ = getBisectorLabelPos(C, extC, B, 54);
+
+                content = `
+                    <line x1="${B.x}" y1="${B.y}" x2="${extA.x}" y2="${extA.y}" stroke="#00f2fe" stroke-width="3" stroke-dasharray="6 4"/>
+                    <line x1="${C.x}" y1="${C.y}" x2="${extB.x}" y2="${extB.y}" stroke="#facc15" stroke-width="3" stroke-dasharray="6 4"/>
+                    <line x1="${A.x}" y1="${A.y}" x2="${extC.x}" y2="${extC.y}" stroke="#fe0979" stroke-width="3" stroke-dasharray="6 4"/>
+                    <polygon points="${A.x},${A.y} ${B.x},${B.y} ${C.x},${C.y}" fill="rgba(57,255,20,0.12)" stroke="#39ff14" stroke-width="4" stroke-linejoin="round" filter="url(#glowLine)"/>
+                    ${createAngleSectorSVG(A, extA, C, 34, 'rgba(0,242,254,0.32)', '#00f2fe')}
+                    ${createAngleSectorSVG(B, extB, A, 34, 'rgba(250,204,21,0.32)', '#facc15')}
+                    ${createAngleSectorSVG(C, extC, B, 34, 'rgba(254,9,121,0.32)', '#fe0979')}
+                    ${angleTooltipsEnabled ? `
+                        ${angleBadgeGroup(posX.x, posX.y, lblX, '#00f2fe', '#000', 'Ángulo exterior x en el vértice A')}
+                        ${angleBadgeGroup(posY.x, posY.y, lblY, '#facc15', '#000', 'Ángulo exterior y en el vértice B')}
+                        ${angleBadgeGroup(posZ.x, posZ.y, lblZ, '#fe0979', '#fff', 'Ángulo exterior z en el vértice C')}
+                    ` : ''}
+                    ${vertexLabelSVG(A.x, A.y, 'A', 'A', centroid)}
+                    ${vertexLabelSVG(B.x, B.y, 'B', 'B', centroid)}
+                    ${vertexLabelSVG(C.x, C.y, 'C', 'C', centroid)}
+                `;
+                liveEq.innerHTML = exData
+                    ? exData.equationPreview
+                    : `<span class="text-cyan-300">${xVal}°</span> + <span class="text-yellow-300">${yVal}°</span> + <span class="text-pink-400">${zVal}°</span> = <b class="text-[#39ff14]">360°</b>`;
+
+            } else if (th.id === 4) {
+                // 4. Propiedad del Bumerán: α = β + θ + ω
+                const { A, B, C, D } = vertexState;
+                const centroid = { x: (A.x + B.x + C.x + D.x) / 4, y: (A.y + B.y + C.y + D.y) / 4 };
+
+                const bVal = Math.round(interiorAngleDeg(A, B, C));
+                const tVal = Math.round(interiorAngleDeg(B, A, D));
+                const wVal = Math.round(interiorAngleDeg(B, C, D));
+                const aVal = bVal + tVal + wVal;
+
+                const lblB = exData ? exData.diagramLabels.b : `β = ${bVal}°`;
+                const lblT = exData ? exData.diagramLabels.t : `θ = ${tVal}°`;
+                const lblW = exData ? exData.diagramLabels.w : `ω = ${wVal}°`;
+                const lblA = exData ? exData.diagramLabels.a : `α = ${aVal}°`;
+
+                const posB = getBisectorLabelPos(B, A, C, 56);
+                const posT = getBisectorLabelPos(A, B, D, 56);
+                const posW = getBisectorLabelPos(C, B, D, 56);
+                const posA = getBisectorLabelPos(D, A, C, 48);
+
+                content = `
+                    <polygon points="${B.x},${B.y} ${A.x},${A.y} ${D.x},${D.y} ${C.x},${C.y}" fill="rgba(255,94,0,0.16)" stroke="#ff5e00" stroke-width="4" stroke-linejoin="round" filter="url(#glowLine)"/>
+                    ${createAngleSectorSVG(B, A, C, 34, 'rgba(250,204,21,0.3)', '#facc15')}
+                    ${createAngleSectorSVG(A, B, D, 34, 'rgba(0,242,254,0.3)', '#00f2fe')}
+                    ${createAngleSectorSVG(C, B, D, 34, 'rgba(57,255,20,0.3)', '#39ff14')}
+                    ${createAngleSectorSVG(D, A, C, 32, 'rgba(254,9,121,0.35)', '#fe0979')}
+                    ${angleTooltipsEnabled ? `
+                        ${angleBadgeGroup(posB.x, posB.y, lblB, '#facc15', '#000', 'Ángulo interior superior β del Bumerán')}
+                        ${angleBadgeGroup(posT.x, posT.y, lblT, '#00f2fe', '#000', 'Ángulo interior izquierdo θ del Bumerán')}
+                        ${angleBadgeGroup(posW.x, posW.y, lblW, '#39ff14', '#000', 'Ángulo interior derecho ω del Bumerán')}
+                        ${angleBadgeGroup(posA.x, posA.y, lblA, '#fe0979', '#fff', 'Ángulo exterior cóncavo α = β + θ + ω')}
+                    ` : ''}
+                    ${vertexLabelSVG(A.x, A.y, 'A', 'A', centroid)}
+                    ${vertexLabelSVG(B.x, B.y, 'B', 'B', centroid)}
+                    ${vertexLabelSVG(C.x, C.y, 'C', 'C', centroid)}
+                    ${vertexLabelSVG(D.x, D.y, 'D', 'D', { x: D.x, y: D.y + 40 })}
+                `;
+                liveEq.innerHTML = exData
+                    ? exData.equationPreview
+                    : `<span class="text-pink-400">α = ${aVal}°</span> &nbsp;⇐&nbsp; <span class="text-yellow-300">${bVal}°</span> + <span class="text-cyan-300">${tVal}°</span> + <span class="text-[#39ff14]">${wVal}°</span> = <b class="text-[#39ff14]">${aVal}°</b>`;
+
+            } else if (th.id === 5) {
+                // 5. Propiedad de la Mariposa: β + θ = α + ω
+                const { A, B, C, D } = vertexState;
+                const P = lineIntersection2D(A, D, B, C);
+
+                const bVal = Math.round(interiorAngleDeg(B, A, P));
+                const tVal = Math.round(interiorAngleDeg(A, B, P));
+                const aVal = Math.round(interiorAngleDeg(D, C, P));
+                const wVal = bVal + tVal - aVal;
+
+                const lblB = exData ? exData.diagramLabels.b : `β = ${bVal}°`;
+                const lblT = exData ? exData.diagramLabels.t : `θ = ${tVal}°`;
+                const lblA = exData ? exData.diagramLabels.a : `α = ${aVal}°`;
+                const lblW = exData ? exData.diagramLabels.w : `ω = ${wVal}°`;
+
+                const posB = getBisectorLabelPos(A, B, P, 52);
+                const posT = getBisectorLabelPos(B, A, P, 52);
+                const posA = getBisectorLabelPos(C, D, P, 52);
+                const posW = getBisectorLabelPos(D, C, P, 52);
+
+                content = `
+                    <polygon points="${A.x},${A.y} ${B.x},${B.y} ${P.x},${P.y}" fill="rgba(0,242,254,0.15)" stroke="#00f2fe" stroke-width="4" stroke-linejoin="round" filter="url(#glowLine)"/>
+                    <polygon points="${C.x},${C.y} ${D.x},${D.y} ${P.x},${P.y}" fill="rgba(254,9,121,0.15)" stroke="#fe0979" stroke-width="4" stroke-linejoin="round" filter="url(#glowLine)"/>
+                    ${createAngleSectorSVG(A, B, P, 32, 'rgba(0,242,254,0.3)', '#00f2fe')}
+                    ${createAngleSectorSVG(B, A, P, 32, 'rgba(250,204,21,0.3)', '#facc15')}
+                    ${createAngleSectorSVG(C, D, P, 32, 'rgba(254,9,121,0.3)', '#fe0979')}
+                    ${createAngleSectorSVG(D, C, P, 32, 'rgba(57,255,20,0.3)', '#39ff14')}
+                    <circle cx="${P.x}" cy="${P.y}" r="6" fill="#facc15"/>
+                    ${angleTooltipsEnabled ? `
+                        ${angleBadgeGroup(posB.x, posB.y, lblB, '#00f2fe', '#000', 'Ángulo superior del ala izquierda (β)')}
+                        ${angleBadgeGroup(posT.x, posT.y, lblT, '#facc15', '#000', 'Ángulo inferior del ala izquierda (θ)')}
+                        ${angleBadgeGroup(posA.x, posA.y, lblA, '#fe0979', '#fff', 'Ángulo superior del ala derecha (α)')}
+                        ${angleBadgeGroup(posW.x, posW.y, lblW, '#39ff14', '#000', 'Ángulo inferior del ala derecha (ω)')}
+                    ` : ''}
+                    ${vertexLabelSVG(A.x, A.y, 'A', 'A', P)}
+                    ${vertexLabelSVG(B.x, B.y, 'B', 'B', P)}
+                    ${vertexLabelSVG(C.x, C.y, 'C', 'C', P)}
+                    ${vertexLabelSVG(D.x, D.y, 'D', 'D', P)}
+                `;
+                liveEq.innerHTML = exData
+                    ? exData.equationPreview
+                    : `<span class="text-cyan-300">${bVal}°</span> + <span class="text-yellow-300">${tVal}°</span> = <span class="text-pink-400">${aVal}°</span> + <span class="text-[#39ff14]">${wVal}°</span> &nbsp;(<b class="text-white">${bVal + tVal}° = ${aVal + wVal}°</b>)`;
+
+            } else if (th.id === 6) {
+                // 6. Propiedad del Pescadito: y + z = α + β
+                const { A, B, C, D } = vertexState;
+                const centroid = { x: (A.x + B.x + C.x + D.x) / 4, y: (A.y + B.y + C.y + D.y) / 4 };
+                const extTop = extendRay(A, B, 85);
+                const extBot = extendRay(A, D, 85);
+
+                const yVal = Math.round(interiorAngleDeg(B, A, D));
+                const zVal = Math.round(interiorAngleDeg(B, C, D));
+                const aVal = Math.round(180 - interiorAngleDeg(A, B, C));
+                const bVal = yVal + zVal - aVal;
+
+                const lblY = exData ? exData.diagramLabels.y : `y = ${yVal}°`;
+                const lblZ = exData ? exData.diagramLabels.z : `z = ${zVal}°`;
+                const lblA = exData ? exData.diagramLabels.a : `α = ${aVal}°`;
+                const lblB = exData ? exData.diagramLabels.b : `β = ${bVal}°`;
+
+                const posY = getBisectorLabelPos(A, B, D, 56);
+                const posZ = getBisectorLabelPos(C, B, D, 56);
+                const posA = getBisectorLabelPos(B, extTop, C, 50);
+                const posB = getBisectorLabelPos(D, extBot, C, 50);
+
+                content = `
+                    <line x1="${A.x}" y1="${A.y}" x2="${extTop.x}" y2="${extTop.y}" stroke="#bf00ff" stroke-width="3.5" stroke-dasharray="6 4"/>
+                    <line x1="${A.x}" y1="${A.y}" x2="${extBot.x}" y2="${extBot.y}" stroke="#bf00ff" stroke-width="3.5" stroke-dasharray="6 4"/>
+                    <polygon points="${A.x},${A.y} ${B.x},${B.y} ${C.x},${C.y} ${D.x},${D.y}" fill="rgba(191,0,255,0.16)" stroke="#00f2fe" stroke-width="4" stroke-linejoin="round" filter="url(#glowLine)"/>
+                    ${createAngleSectorSVG(A, B, D, 34, 'rgba(0,242,254,0.3)', '#00f2fe')}
+                    ${createAngleSectorSVG(C, B, D, 34, 'rgba(57,255,20,0.3)', '#39ff14')}
+                    ${createAngleSectorSVG(B, extTop, C, 32, 'rgba(250,204,21,0.35)', '#facc15')}
+                    ${createAngleSectorSVG(D, extBot, C, 32, 'rgba(254,9,121,0.35)', '#fe0979')}
+                    ${angleTooltipsEnabled ? `
+                        ${angleBadgeGroup(posY.x, posY.y, lblY, '#00f2fe', '#000', 'Ángulo interior de la cabeza (y)')}
+                        ${angleBadgeGroup(posZ.x, posZ.y, lblZ, '#39ff14', '#000', 'Ángulo interior de la cola (z)')}
+                        ${angleBadgeGroup(posA.x, posA.y, lblA, '#facc15', '#000', 'Ángulo exterior de la aleta superior (α)')}
+                        ${angleBadgeGroup(posB.x, posB.y, lblB, '#fe0979', '#fff', 'Ángulo exterior de la aleta inferior (β)')}
+                    ` : ''}
+                    ${vertexLabelSVG(A.x, A.y, 'A', 'A', centroid)}
+                    ${vertexLabelSVG(B.x, B.y, 'B', 'B', centroid)}
+                    ${vertexLabelSVG(C.x, C.y, 'C', 'C', centroid)}
+                    ${vertexLabelSVG(D.x, D.y, 'D', 'D', centroid)}
+                `;
+                liveEq.innerHTML = exData
+                    ? exData.equationPreview
+                    : `<span class="text-cyan-300">${yVal}°</span> + <span class="text-[#39ff14]">${zVal}°</span> = <span class="text-yellow-300">${aVal}°</span> + <span class="text-pink-400">${bVal}°</span> &nbsp;(<b class="text-white">${yVal + zVal}° = ${aVal + bVal}°</b>)`;
+
+            } else if (th.id === 7) {
+                // 7. Dos Bisectrices Interiores (Incentro real I): x = 90° + θ/2
+                const { A, B, C } = vertexState;
+                const centroid = { x: (A.x + B.x + C.x) / 3, y: (A.y + B.y + C.y) / 3 };
+                const lenA = dist2D(B, C);
+                const lenB = dist2D(A, C);
+                const lenC = dist2D(A, B);
+                const perim = (lenA + lenB + lenC) || 1;
+                const I = {
+                    x: (lenA * A.x + lenB * B.x + lenC * C.x) / perim,
+                    y: (lenA * A.y + lenB * B.y + lenC * C.y) / perim
+                };
+
+                const thetaVal = Math.round(interiorAngleDeg(A, B, C));
+                const xVal = +(90 + thetaVal / 2).toFixed(1);
+
+                const lblTop = exData ? exData.diagramLabels.top : `θ = ${thetaVal}°`;
+                const lblX = exData ? exData.diagramLabels.x : `x = ${xVal}°`;
+
+                const posTop = getBisectorLabelPos(B, A, C, 54);
+                const posX = getBisectorLabelPos(I, A, C, 44);
+
+                content = `
+                    <polygon points="${A.x},${A.y} ${B.x},${B.y} ${C.x},${C.y}" fill="rgba(0,242,254,0.1)" stroke="#00f2fe" stroke-width="4" stroke-linejoin="round" filter="url(#glowLine)"/>
+                    <polyline points="${A.x},${A.y} ${I.x},${I.y} ${C.x},${C.y}" fill="rgba(254,9,121,0.16)" stroke="#facc15" stroke-width="3.5" stroke-dasharray="8 4"/>
+                    ${createAngleSectorSVG(B, A, C, 34, 'rgba(250,204,21,0.3)', '#facc15')}
+                    ${createAngleSectorSVG(I, A, C, 30, 'rgba(254,9,121,0.35)', '#fe0979')}
+                    ${vertexLabelSVG(I.x, I.y, 'I', null, { x: I.x, y: I.y + 30 })}
+                    ${angleTooltipsEnabled ? `
+                        ${angleBadgeGroup(posTop.x, posTop.y, lblTop, '#facc15', '#000', 'Tercer ángulo interior θ en el vértice B')}
+                        ${angleBadgeGroup(posX.x, posX.y, lblX, '#fe0979', '#fff', 'Ángulo entre las dos bisectrices interiores: x = 90° + θ/2')}
+                    ` : ''}
+                    ${vertexLabelSVG(A.x, A.y, 'A', 'A', centroid)}
+                    ${vertexLabelSVG(B.x, B.y, 'B', 'B', centroid)}
+                    ${vertexLabelSVG(C.x, C.y, 'C', 'C', centroid)}
+                `;
+                liveEq.innerHTML = exData
+                    ? exData.equationPreview
+                    : `<span class="text-pink-400">x</span> = 90° + <span class="text-yellow-300">${thetaVal}°</span>/2 = 90° + ${(thetaVal / 2).toFixed(1)}° = <b class="text-[#39ff14]">${xVal}°</b>`;
+
+            } else if (th.id === 8) {
+                // 8. Dos Bisectrices Exteriores (Excentro opuesto a B): x = 90° - ω/2
+                const { A, B, C } = vertexState;
+                const centroid = { x: (A.x + B.x + C.x) / 3, y: (A.y + B.y + C.y) / 3 };
+                const extC = extendRay(B, C, 110);
+                const extA = extendRay(B, A, 110);
+
+                const lenA = dist2D(B, C);
+                const lenB = dist2D(A, C);
+                const lenC = dist2D(A, B);
+                const denom = (lenA - lenB + lenC) || 1;
+                let E = {
+                    x: (lenA * A.x - lenB * B.x + lenC * C.x) / denom,
+                    y: (lenA * A.y - lenB * B.y + lenC * C.y) / denom
+                };
+                E.x = Math.max(380, Math.min(620, E.x));
+                E.y = Math.max(55, Math.min(345, E.y));
+
+                const omegaVal = Math.round(interiorAngleDeg(A, B, C));
+                const xVal = +(90 - omegaVal / 2).toFixed(1);
+
+                const lblTop = exData ? exData.diagramLabels.top : `ω = ${omegaVal}°`;
+                const lblX = exData ? exData.diagramLabels.x : `x = ${xVal}°`;
+
+                const posTop = getBisectorLabelPos(B, A, C, 54);
+                const posX = getBisectorLabelPos(E, A, C, 52);
+
+                content = `
+                    <line x1="${B.x}" y1="${B.y}" x2="${extC.x}" y2="${extC.y}" stroke="#00f2fe" stroke-width="3" stroke-dasharray="6 4"/>
+                    <line x1="${B.x}" y1="${B.y}" x2="${extA.x}" y2="${extA.y}" stroke="#00f2fe" stroke-width="3" stroke-dasharray="6 4"/>
+                    <polygon points="${B.x},${B.y} ${C.x},${C.y} ${A.x},${A.y}" fill="rgba(0,242,254,0.14)" stroke="#00f2fe" stroke-width="4" stroke-linejoin="round" filter="url(#glowLine)"/>
+                    <polyline points="${C.x},${C.y} ${E.x},${E.y} ${A.x},${A.y}" fill="rgba(250,204,21,0.14)" stroke="#facc15" stroke-width="3.5" stroke-dasharray="8 4"/>
+                    ${createAngleSectorSVG(B, C, A, 34, 'rgba(0,242,254,0.3)', '#00f2fe')}
+                    ${createAngleSectorSVG(E, C, A, 34, 'rgba(250,204,21,0.35)', '#facc15')}
+                    ${vertexLabelSVG(E.x, E.y, 'E', null, centroid)}
+                    ${angleTooltipsEnabled ? `
+                        ${angleBadgeGroup(posTop.x, posTop.y, lblTop, '#00f2fe', '#000', 'Ángulo interior ω en el vértice B')}
+                        ${angleBadgeGroup(posX.x, posX.y, lblX, '#facc15', '#000', 'Ángulo entre dos bisectrices exteriores: x = 90° − ω/2')}
+                    ` : ''}
+                    ${vertexLabelSVG(B.x, B.y, 'B', 'B', centroid)}
+                    ${vertexLabelSVG(C.x, C.y, 'C', 'C', centroid)}
+                    ${vertexLabelSVG(A.x, A.y, 'A', 'A', centroid)}
+                `;
+                liveEq.innerHTML = exData
+                    ? exData.equationPreview
+                    : `<span class="text-yellow-300">x</span> = 90° − <span class="text-cyan-300">${omegaVal}°</span>/2 = 90° − ${(omegaVal / 2).toFixed(1)}° = <b class="text-[#39ff14]">${xVal}°</b>`;
+
+            } else if (th.id === 9) {
+                // 9. Una Bisectriz Interior y una Bisectriz Exterior: x = ϕ/2
+                const { A, B, C } = vertexState;
+                const centroid = { x: (A.x + B.x + C.x) / 3, y: (A.y + B.y + C.y) / 3 };
+                const extAC = extendRay(A, C, 160);
+
+                // Bisectriz interior en A y bisectriz exterior en C
+                const uAB = { x: (B.x - A.x) / (dist2D(A, B) || 1), y: (B.y - A.y) / (dist2D(A, B) || 1) };
+                const uAC = { x: (C.x - A.x) / (dist2D(A, C) || 1), y: (C.y - A.y) / (dist2D(A, C) || 1) };
+                const bisA = { x: A.x + (uAB.x + uAC.x) * 100, y: A.y + (uAB.y + uAC.y) * 100 };
+
+                const uCB = { x: (B.x - C.x) / (dist2D(C, B) || 1), y: (B.y - C.y) / (dist2D(C, B) || 1) };
+                const bisC = { x: C.x + (uCB.x + uAC.x) * 100, y: C.y + (uCB.y + uAC.y) * 100 };
+
+                let E = lineIntersection2D(A, bisA, C, bisC);
+                E.x = Math.max(430, Math.min(615, E.x));
+                E.y = Math.max(55, Math.min(250, E.y));
+
+                const phiVal = Math.round(interiorAngleDeg(A, B, C));
+                const xVal = +(phiVal / 2).toFixed(1);
+
+                const lblPhi = exData ? exData.diagramLabels.phi : `ϕ = ${phiVal}°`;
+                const lblX = exData ? exData.diagramLabels.x : `x = ${xVal}°`;
+
+                const posPhi = getBisectorLabelPos(B, A, C, 52);
+                const posX = getBisectorLabelPos(E, A, C, 54);
+
+                content = `
+                    <line x1="${A.x}" y1="${A.y}" x2="${extAC.x}" y2="${extAC.y}" stroke="#00f2fe" stroke-width="3.5" stroke-dasharray="6 4"/>
+                    <polygon points="${A.x},${A.y} ${B.x},${B.y} ${C.x},${C.y}" fill="rgba(0,242,254,0.14)" stroke="#00f2fe" stroke-width="4" stroke-linejoin="round" filter="url(#glowLine)"/>
+                    <polyline points="${A.x},${A.y} ${E.x},${E.y} ${C.x},${C.y}" fill="none" stroke="#fe0979" stroke-width="3.5" stroke-dasharray="8 4"/>
+                    ${createAngleSectorSVG(B, A, C, 34, 'rgba(57,255,20,0.32)', '#39ff14')}
+                    ${createAngleSectorSVG(E, A, C, 36, 'rgba(254,9,121,0.35)', '#fe0979')}
+                    ${vertexLabelSVG(E.x, E.y, 'E', null, centroid)}
+                    ${angleTooltipsEnabled ? `
+                        ${angleBadgeGroup(posPhi.x, posPhi.y, lblPhi, '#39ff14', '#000', 'Tercer ángulo interior ϕ en el vértice B')}
+                        ${angleBadgeGroup(posX.x, posX.y, lblX, '#fe0979', '#fff', 'Ángulo formado por 1 bisectriz interna y 1 externa: x = ϕ/2')}
+                    ` : ''}
+                    ${vertexLabelSVG(A.x, A.y, 'A', 'A', centroid)}
+                    ${vertexLabelSVG(B.x, B.y, 'B', 'B', centroid)}
+                    ${vertexLabelSVG(C.x, C.y, 'C', 'C', centroid)}
+                `;
+                liveEq.innerHTML = exData
+                    ? exData.equationPreview
+                    : `<span class="text-pink-400">x</span> = <span class="text-[#39ff14]">${phiVal}°</span> / 2 = <b class="text-[#39ff14]">${xVal}°</b>`;
+            }
+
+            svg.innerHTML = defs + content;
+        }
+
+        function renderSlidersForCurrentTheorem() {
+            const container = document.getElementById('interactiveSlidersContainer');
+            const keys = Object.keys(vertexState);
+
+            container.innerHTML = keys.map(k => {
+                const pt = vertexState[k];
+                return `
+                    <div class="bg-slate-900/90 border border-slate-700 rounded-xl px-3 py-2 flex items-center justify-between">
+                        <span class="text-xs font-black text-cyan-300 flex items-center gap-1.5">
+                            <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 inline-block"></span>
+                            Vértice <span class="math-expr text-white text-sm">${k}</span>
+                        </span>
+                        <span class="math-expr text-xs font-bold text-yellow-300">
+                            (${pt.x}, ${pt.y})
+                        </span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function resetSlidersToDefault() {
+            const th = THEOREMS_DATA[currentTheoremIdx];
+            vertexState = cloneDefaultVertices(th.id);
+            playSound('switch');
+            renderSlidersForCurrentTheorem();
+            switchDiagramViewMode('EXPLORE', true);
+        }
+
+        function switchDiagramViewMode(mode, silent = false) {
+            currentDiagramMode = mode;
+            if (!silent) playSound('switch');
+
+            ['EXPLORE', 'EX1', 'EX2'].forEach(m => {
+                const btn = document.getElementById(`modeBtn-${m}`);
+                if (!btn) return;
+                if (m === mode) {
+                    btn.className = "px-3.5 py-1.5 rounded-xl font-black text-xs bg-cyan-400 text-black shadow-[0_0_15px_rgba(0,242,254,0.5)] transition-all";
+                } else {
+                    btn.className = "px-3.5 py-1.5 rounded-xl font-black text-xs bg-slate-800 text-slate-300 border border-slate-600 hover:bg-slate-700 transition-all";
+                }
+            });
+
+            const dot = document.getElementById('diagramModeDot');
+            const title = document.getElementById('diagramOverlayTitle');
+            const sub = document.getElementById('diagramOverlaySub');
+
+            if (mode === 'EXPLORE') {
+                dot.className = "w-3 h-3 rounded-full bg-cyan-400 shadow-[0_0_10px_#00f2fe]";
+                title.textContent = "GEOMETRÍA DINÁMICA • ARRASTRA LOS VÉRTICES";
+                sub.textContent = "Arrastra cualquier vértice A, B, C con el mouse o dedo para cambiar los ángulos";
+            } else if (mode === 'EX1') {
+                dot.className = "w-3 h-3 rounded-full bg-yellow-400 shadow-[0_0_10px_#facc15]";
+                title.textContent = "VISUALIZANDO DATOS DEL EJEMPLO 1";
+                sub.textContent = "Observa los datos en la figura (también puedes mover los vértices)";
+            } else if (mode === 'EX2') {
+                dot.className = "w-3 h-3 rounded-full bg-pink-500 shadow-[0_0_10px_#fe0979]";
+                title.textContent = "VISUALIZANDO DATOS DEL EJEMPLO 2";
+                sub.textContent = "Observa los datos en la figura (también puedes mover los vértices)";
+            }
+
+            renderGeometrySVG();
+        }
+
+        function selectTheorem(index, isSilent = false) {
+            clearDemoTimers();
+            currentTheoremIdx = index;
+            const th = THEOREMS_DATA[index];
+
+            // Actualizar botones superiores
+            for (let i = 0; i < THEOREMS_DATA.length; i++) {
+                const btn = document.getElementById(`thNavBtn-${i}`);
+                if (!btn) continue;
+                if (i === index) {
+                    btn.className = "px-2.5 py-1.5 rounded-xl font-black text-xs bg-gradient-to-b from-cyan-400 to-cyan-600 text-black border-b-2 border-cyan-900 shadow-[0_0_12px_rgba(0,242,254,0.45)]";
+                } else {
+                    btn.className = "px-2.5 py-1.5 rounded-xl font-bold text-xs bg-slate-800/90 text-slate-300 border border-slate-600 hover:border-cyan-400";
+                }
+            }
+
+            document.getElementById('headerSubtitleBadge').textContent = `PROPIEDADES DE LOS TRIÁNGULOS • TEOREMA ${index + 1} DE 9`;
+            document.getElementById('theoremCategoryPill').textContent = th.groupBadge;
+            document.getElementById('theoremShortTag').textContent = th.tag;
+            document.getElementById('theoremTitleDisplay').textContent = th.shortTitle;
+            document.getElementById('theoremLatexFormulaBox').innerHTML = th.formulaHTML;
+            document.getElementById('theoremStatementText').innerHTML = th.statement;
+
+            // Inicializar vértices arrastrables de la figura
+            vertexState = cloneDefaultVertices(th.id);
+            renderSlidersForCurrentTheorem();
+
+            // Configurar Ejemplo 1 y Ejemplo 2
+            const ex1 = th.examples[0];
+            const ex2 = th.examples[1];
+
+            document.getElementById('ex1PromptText').innerHTML = ex1.prompt;
+            document.getElementById('ex1GivenBadges').innerHTML = ex1.given.map(g => `
+                <span class="math-expr bg-slate-950 text-cyan-300 border border-cyan-500/40 px-2.5 py-1 rounded-xl text-xs font-bold">${g}</span>
+            `).join('');
+            document.getElementById('ex1EquationPreview').innerHTML = ex1.equationPreview;
+
+            document.getElementById('ex2PromptText').innerHTML = ex2.prompt;
+            document.getElementById('ex2GivenBadges').innerHTML = ex2.given.map(g => `
+                <span class="math-expr bg-slate-950 text-pink-300 border border-pink-500/40 px-2.5 py-1 rounded-xl text-xs font-bold">${g}</span>
+            `).join('');
+            document.getElementById('ex2EquationPreview').innerHTML = ex2.equationPreview;
+
+            resetCurrentExamples(true);
+            switchDiagramViewMode('EXPLORE', true);
+
+            if (!isSilent) playSound('switch');
+            setRobotMood('happy');
+            updateRobotSpeech(th.robotIntro);
+        }
+
+        function setExampleStatusBadge(badgeId, isValid, isEmpty) {
+            const el = document.getElementById(badgeId);
+            if (!el) return;
+            if (isEmpty) {
+                el.innerHTML = `<span class="w-8 h-8 rounded-full bg-slate-800 border border-slate-600 flex items-center justify-center text-slate-400 text-xs"><i class="fa-solid fa-minus"></i></span>`;
+            } else if (isValid) {
+                el.innerHTML = `<span class="w-8 h-8 rounded-full bg-[#39ff14] text-black flex items-center justify-center text-xs font-black shadow-[0_0_12px_#39ff14]"><i class="fa-solid fa-check"></i></span>`;
+            } else {
+                el.innerHTML = `<span class="w-8 h-8 rounded-full bg-[#fe0979] text-white flex items-center justify-center text-xs font-black"><i class="fa-solid fa-xmark"></i></span>`;
+            }
+        }
+
+        function validateExampleAnswer(exampleNumber, suppressAudio = false) {
+            const th = THEOREMS_DATA[currentTheoremIdx];
+            const ex = th.examples[exampleNumber - 1];
+
+            const inputEl = document.getElementById(`inputEx${exampleNumber}Answer`);
+            const stepBox = document.getElementById(`ex${exampleNumber}StepByStepBox`);
+            const badgeId = `statusEx${exampleNumber}Badge`;
+            const flagKey = exampleNumber === 1 ? 'ex1' : 'ex2';
+
+            const raw = inputEl.value.trim();
+            const val = parseFloat(raw);
+
+            if (raw === '') {
+                inputEl.classList.remove('valid-input', 'invalid-input');
+                setExampleStatusBadge(badgeId, false, true);
+                stepBox.innerHTML = `Ingresa tu respuesta arriba para verificar el desarrollo paso a paso.`;
+                solvedState[flagKey] = false;
+            } else if (Math.abs(val - ex.answer) < 0.01) {
+                if (!solvedState[flagKey] && !suppressAudio) {
+                    playSound('valid', exampleNumber);
+                }
+                inputEl.classList.add('valid-input');
+                inputEl.classList.remove('invalid-input');
+                setExampleStatusBadge(badgeId, true, false);
+                stepBox.innerHTML = `<div class="math-expr text-sm text-white"><span class="text-cyan-400 font-sans font-black text-[11px] uppercase mr-2">PASO A PASO:</span>${ex.stepsHTML}</div>`;
+                solvedState[flagKey] = true;
+            } else {
+                inputEl.classList.add('invalid-input');
+                inputEl.classList.remove('valid-input');
+                setExampleStatusBadge(badgeId, false, false);
+                stepBox.innerHTML = `<span class="text-pink-400 font-bold">Revisa tu operación en el Paso 1 e inténtalo de nuevo.</span>`;
+                solvedState[flagKey] = false;
+            }
+
+            const count = (solvedState.ex1 ? 1 : 0) + (solvedState.ex2 ? 1 : 0);
+            document.getElementById('studentProgressBadge').textContent = `EJEMPLOS RESUELTOS: ${count} / 2`;
+
+            if (count === 2 && !suppressAudio) {
+                playSound('celebrate');
+                updateRobotSpeech(`¡Excelente trabajo Aula N.° 3! Resolvieron correctamente los 2 ejemplos de <b>${th.shortTitle}</b>. ¡Pueden elegir el siguiente teorema arriba!`);
+            }
+        }
+
+        function explainCurrentTheorem() {
+            const th = THEOREMS_DATA[currentTheoremIdx];
+            playSound('switch');
+            setRobotMood('happy');
+            switchDiagramViewMode('EXPLORE', true);
+            updateRobotSpeech(`<b>${th.shortTitle}:</b> ${th.statement}`);
+        }
+
+        function giveExampleHint() {
+            const th = THEOREMS_DATA[currentTheoremIdx];
+            playSound('switch');
+            setRobotMood('thinking');
+
+            if (!solvedState.ex1) {
+                switchDiagramViewMode('EX1', true);
+                updateRobotSpeech(`<b>Pista para el Ejemplo 1:</b> Plantea <span class="math-expr text-cyan-300">${th.examples[0].equationPreview}</span> y despeja: <span class="math-expr text-yellow-300">${th.examples[0].stepsHTML}</span>`);
+                document.getElementById('inputEx1Answer').focus();
+            } else if (!solvedState.ex2) {
+                switchDiagramViewMode('EX2', true);
+                updateRobotSpeech(`<b>Pista para el Ejemplo 2:</b> Plantea <span class="math-expr text-pink-300">${th.examples[1].equationPreview}</span> y despeja: <span class="math-expr text-yellow-300">${th.examples[1].stepsHTML}</span>`);
+                document.getElementById('inputEx2Answer').focus();
+            } else {
+                updateRobotSpeech(`¡Ya completaste los 2 ejemplos de este teorema! Selecciona otro teorema en la barra superior.`);
+            }
+        }
+
+        function clearDemoTimers() {
+            demoTimers.forEach(t => clearTimeout(t));
+            demoTimers = [];
+        }
+
+        function autoSolveBothExamples() {
+            clearDemoTimers();
+            const th = THEOREMS_DATA[currentTheoremIdx];
+
+            const t1 = setTimeout(() => {
+                switchDiagramViewMode('EX1', true);
+                const in1 = document.getElementById('inputEx1Answer');
+                in1.value = th.examples[0].answer;
+                validateExampleAnswer(1, false);
+            }, 150);
+
+            const t2 = setTimeout(() => {
+                switchDiagramViewMode('EX2', true);
+                const in2 = document.getElementById('inputEx2Answer');
+                in2.value = th.examples[1].answer;
+                validateExampleAnswer(2, false);
+            }, 650);
+
+            demoTimers.push(t1, t2);
+        }
+
+        function resetCurrentExamples(silent = false) {
+            clearDemoTimers();
+            if (!silent) playSound('switch');
+            const in1 = document.getElementById('inputEx1Answer');
+            const in2 = document.getElementById('inputEx2Answer');
+            if (in1) in1.value = '';
+            if (in2) in2.value = '';
+            solvedState = { ex1: false, ex2: false };
+            validateExampleAnswer(1, true);
+            validateExampleAnswer(2, true);
+        }
+
+        function animateRobotLoop() {
+            requestAnimationFrame(animateRobotLoop);
+            const t = performance.now() * 0.0035;
+
+            if (headGroup) {
+                headGroup.position.y = Math.sin(t) * 0.06;
+                const isBlinking = Math.sin(t * 0.9) > 0.985;
+                if (leftEye && rightEye) {
+                    const targetScaleY = isBlinking ? 0.12 : 1.15;
+                    leftEye.scale.y += (targetScaleY - leftEye.scale.y) * 0.35;
+                    rightEye.scale.y += (targetScaleY - rightEye.scale.y) * 0.35;
+                }
+                if (moodTimer > 0) moodTimer--;
+                else if (!isDraggingRobot) {
+                    headGroup.rotation.y += (Math.sin(t * 0.6) * 0.16 - headGroup.rotation.y) * 0.05;
+                }
+            }
+            if (robotRenderer && robotScene && robotCamera) {
+                robotRenderer.render(robotScene, robotCamera);
+            }
+        }
+
+        function onWindowResize() {
+            const robotContainer = document.getElementById('robotCanvasContainer');
+            if (robotContainer && robotRenderer && robotCamera) {
+                const rw = robotContainer.clientWidth || 128;
+                const rh = robotContainer.clientHeight || 128;
+                robotCamera.aspect = rw / rh;
+                robotCamera.updateProjectionMatrix();
+                robotRenderer.setSize(rw, rh);
+            }
+        }
+
+        window.onload = function () {
+            renderCoverAndNav();
+            initRobot3D();
+            selectTheorem(0, true);
+            animateRobotLoop();
+            window.addEventListener('resize', onWindowResize);
+        };
+    </script>
+</body>
+</html>
